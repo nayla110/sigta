@@ -57,7 +57,7 @@ export default function DosenLayout({
     <div className="flex flex-col min-h-screen">
       {/* --- BAGIAN 1: HEADER PENUH --- */}
       <header className={`flex justify-between items-center p-4 px-8 sticky top-0 z-20 ${headerBg} ${shadow} w-full`}>
-        <h1 className={`text-4xl font-serif font-bold ${titleColor}`}>
+        <h1 className={`text-3xl font-gentium font-bold ${titleColor}`}>
           {title}
         </h1>
         

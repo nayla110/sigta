@@ -1,0 +1,23 @@
+PANDUAN INSTAL DI TERMINAL DAN PENAMBAHAN FILE TAILWIND
+
+npm install -D tailwindcss postcss autoprefixer
+npm install lucide-react
+npm install @tailwindcss/postcss
+
+tambahin file tailwind.config.js di root
+isinya:
+
+/** @type {import('tailwindcss').Config} */
+module.exports = {
+  content: [
+    // Ini path untuk memindai semua file di folder app, components, dan pages
+    './app/**/*.{js,ts,jsx,tsx,mdx}',
+    './components/**/*.{js,ts,jsx,tsx,mdx}',
+    './src/app/**/*.{js,ts,jsx,tsx,mdx}',
+    './src/components/**/*.{js,ts,jsx,tsx,mdx}',
+  ],
+  theme: {
+    extend: {},
+  },
+  plugins: [],
+}
