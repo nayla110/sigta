@@ -1,9 +1,13 @@
-// app/bimbingan/page.tsx
+// app/mahasiswa/bimbingan/page.tsx
 'use client';
 
 import React, { useState } from 'react';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 
 export default function BimbinganPage() {
+  const pathname = usePathname();
+
   const [form, setForm] = useState({
     advisor: '',
     date: '',
@@ -55,34 +59,61 @@ export default function BimbinganPage() {
     alt="logo"
     className="w-50 h-25 object-contain"
   />
-</div>
-
+          </div>
         </div>
-        
+
         <nav className="flex-1 px-1 py-3">
           <ul className="space-y-3">
-            <li className="flex items-center gap-3 px-3 py-2 rounded hover:bg-blue-600 cursor-pointer">
-             <span className="w-6 h-6 rounded overflow-hidden">
-                    <img src="/icons/home.png" alt="Halaman Utama" className="object-contain w-full h-full" />
-                </span>
-              <span className="font-medium">Halaman Utama</span>
-            </li>
-            <li className="flex items-center gap-3 px-3 py-2 rounded bg-white/50">
+            {/* Halaman Utama */}
+            <li>
+              <Link
+                href="/mahasiswa"
+                className={`flex items-center gap-3 px-3 py-2 rounded ${
+                  pathname === '/mahasiswa' ? 'bg-blue-600' : 'hover:bg-blue-700'
+                }`}
+              >
                 <span className="w-6 h-6 rounded overflow-hidden">
-                    <img src="/icons/Bimbingan.png" alt="Bimbingan" className="object-contain w-full h-full" />
+                  <img src="/icons/home.png" alt="Halaman Utama" className="object-contain w-full h-full" />
                 </span>
-              <span className="font-medium">Bimbingan</span>
+                <span className="font-medium">Halaman Utama</span>
+              </Link>
             </li>
-            <li className="flex items-center gap-3 px-3 py-2 rounded hover:bg-blue-600 cursor-pointer">
+
+            {/* Bimbingan (active on this page) */}
+            <li>
+              <Link
+                href="/mahasiswa/bimbingan"
+                className={`flex items-center gap-3 px-3 py-2 rounded ${
+                  pathname?.startsWith('/mahasiswa/bimbingan') ? 'bg-white/50 text-black' : 'hover:bg-blue-700'
+                }`}
+              >
                 <span className="w-6 h-6 rounded overflow-hidden">
-                    <img src="/icons/Tugas.png" alt="Tugas Akhir" className="object-contain w-full h-full" />
-                </span>            
+                  <img src="/icons/Bimbingan.png" alt="Bimbingan" className="object-contain w-full h-full" />
+                </span>
+                <span className="font-medium">Bimbingan</span>
+              </Link>
+            </li>
+
+            {/* Tugas Akhir */}
+            <li>
+              <Link
+                href="/mahasiswa/TA"
+                className={`flex items-center gap-3 px-3 py-2 rounded ${
+                  pathname?.startsWith('/mahasiswa/TA') ? 'bg-blue-600' : 'hover:bg-blue-700'
+                }`}
+              >
+                <span className="w-6 h-6 rounded overflow-hidden">
+                  <img src="/icons/Tugas.png" alt="Tugas Akhir" className="object-contain w-full h-full" />
+                </span>
                 <span className="font-medium">Tugas Akhir</span>
+              </Link>
             </li>
           </ul>
         </nav>
 
-        <div className="px-6 py-4 text-sm opacity-80">About us</div>
+        <div className="px-6 py-4 text-sm opacity-80 text-center">
+          <Link href="https://www.polibatam.ac.id/" >About us </Link>
+        </div>
       </aside>
 
       {/* Main content area */}
@@ -90,8 +121,7 @@ export default function BimbinganPage() {
         {/* Top navbar */}
         <header className="bg-white text-black px-6 py-3 flex items-center justify-between shadow">
           <div className="text-lg font-semibold">Jadwal Bimbingan</div>
-          <div className="flex items-center gap-3">
-          </div>
+          <div className="flex items-center gap-3"></div>
         </header>
 
         {/* Page content */}
@@ -101,9 +131,12 @@ export default function BimbinganPage() {
             {/* Form header */}
             <div className="bg-white border rounded shadow-sm p-4">
               <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center gap-2">
+                <div />
+                <div className="w-full text-lg font-bold text-black text-center">Isi form untuk menambah jadwal</div>
+                {/* Tombol cepat ke TA */}
+                <div>
+                  
                 </div>
-                <div className="w-full text-lg font-bold text-black text-center"> Isi form untuk menambah jadwal </div>
               </div>
 
               {/* Form grid */}
@@ -178,9 +211,15 @@ export default function BimbinganPage() {
                     >
                       Kembali
                     </button>
+
                     <button onClick={handleSave} className="px-4 py-2 bg-blue-700 text-white rounded hover:bg-blue-800">
                       Simpan
                     </button>
+
+                    {/* tombol navigasi ke Tugas Akhir */}
+                    <Link href="/mahasiswa/TA" className="px-4 py-2 border rounded hover:bg-gray-100 text-sm">
+                      Ke Tugas Akhir
+                    </Link>
                   </div>
                 </div>
               </div>
