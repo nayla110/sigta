@@ -205,21 +205,10 @@ export default function BimbinganPage() {
                   </select>
 
                   <div className="flex items-center gap-3 pt-4">
-                    <button
-                      onClick={() => setForm({ advisor: '', date: '', time: '', room: '', title: '' })}
-                      className="px-4 py-2 border rounded hover:bg-gray-50"
-                    >
-                      Kembali
-                    </button>
 
                     <button onClick={handleSave} className="px-4 py-2 bg-blue-700 text-white rounded hover:bg-blue-800">
                       Simpan
                     </button>
-
-                    {/* tombol navigasi ke Tugas Akhir */}
-                    <Link href="/mahasiswa/TA" className="px-4 py-2 border rounded hover:bg-gray-100 text-sm">
-                      Ke Tugas Akhir
-                    </Link>
                   </div>
                 </div>
               </div>

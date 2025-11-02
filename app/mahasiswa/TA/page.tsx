@@ -155,7 +155,7 @@ export default function Page() {
         <div className="px-6 py-4 text-sm opacity-80 text-center">
           <Link href="https://www.polibatam.ac.id/" >About us </Link>
         </div>
-        
+
       </aside>
 
       {/* Main area */}
@@ -237,11 +237,6 @@ export default function Page() {
                         >
                           Posting
                         </button>
-
-                        {/* tombol cepat pindah ke bimbingan setelah posting (opsional) */}
-                        <Link href="/mahasiswa/bimbingan" className="px-4 py-2 border rounded-full text-sm hover:bg-gray-100">
-                          Ke Bimbingan
-                        </Link>
                       </div>
                     </div>
 
