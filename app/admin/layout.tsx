@@ -12,12 +12,12 @@ import {
 export default function AdminLayout({
   children,
 }: {
-  children: React.ReactNode;
+  children: React.ReactNode;           
 }) {
   return (
     <div className="min-h-screen flex bg-[#f5f8ff]">
       {/* SIDEBAR */}
-      <aside className="fixed top-0 left-0 h-full w-[250px] bg-[#1d4f91] text-white flex flex-col justify-between shadow-lg">
+      <aside className="fixed top-0 left-0 h-full w-[220px] bg-[#1d4f91] text-black flex flex-col justify-between shadow-lg">
         <div>
          <div className="items-center justify-center">
   <img
