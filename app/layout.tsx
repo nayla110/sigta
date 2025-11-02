@@ -3,7 +3,7 @@ import { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: 'SIGTA - Bimbingan Tugas Akhir',
-  description: 'Sistem Informasi Bimbingan Tugas Akhir',
+  description: 'Sistem Informasi Bimbingan Tugas Akhir',  
 };
 
 export default function RootLayout({
