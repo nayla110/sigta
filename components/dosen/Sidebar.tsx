@@ -1,8 +1,26 @@
+
+
 'use client'; 
 
 import Link from 'next/link';
 import { Home, User, CalendarDays, BookOpen, FileText } from 'lucide-react';
 import { usePathname } from 'next/navigation';
+import Image from 'next/image';
+
+
+// Asumsi: Logo diletakkan di public/logo-sigta.png
+// Kita akan membuat komponen Logo-nya di dalam file Sidebar ini agar tidak perlu import dari Shared
+const Logo = () => (
+    <div className="flex items-center justify-center p-4">
+        <Image
+            src="/logo-sigta.png" // Path ke file logo Anda di folder public
+            alt="Logo SIGTA"
+            width={94}
+            height={694}
+            className="object-contain" 
+        />
+    </div>
+);
 
 const navItems = [
   // Halaman Utama
@@ -25,13 +43,14 @@ export const Sidebar = () => {
 
   return (
     // Menggunakan flex-shrink-0 dan min-h-full agar sidebar mengikuti layout di bawah header
-    <aside className="w-64 bg-blue-300 flex-shrink-0 text-white shadow-xl flex flex-col justify-between z-10 font-serif min-h-full">
+    <aside className="w-64 bg-blue-300 flex-shrink-0 text-black shadow-xl flex flex-col justify-between z-10 font-serif min-h-full">
       
       {/* Logo/Nama Aplikasi */}
-      <div className="p-4 pt-8 text-center border-b border-blue-400">
-        
+      <div className="p-4 pt-8 text-center">
+        {/* --- PENAMBAHAN KODE: PENGGUNAAN KOMPONEN LOGO --- */}
+        <Logo />
       </div>
-      
+
       <div className="pt-2 flex-grow">
         {navItems.map((item) => {
           const Icon = item.icon;
@@ -45,8 +64,8 @@ export const Sidebar = () => {
               href={item.href}
               className={`flex items-center p-4 transition-colors text-lg font-medium 
                 ${isActive 
-                  ? 'bg-blue-800 border-r-4 border-white font-bold' // Status Aktif
-                  : 'hover:bg-blue-600' // Status Hover
+                  ? 'bg-white border-r-4 border-white font-bold' // Status Aktif
+                  : 'hover:bg-white' // Status Hover
                 }
               `}
             >
@@ -60,7 +79,7 @@ export const Sidebar = () => {
       </div>
       
       {/* About Us Placeholder */}
-      <div className="p-4 text-sm text--300 border-t border-blue-400">
+      <div className="p-4 text-sm text--300">
         About us
       </div>
     </aside>
