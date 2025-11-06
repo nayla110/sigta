@@ -1,49 +1,91 @@
-"use client";
+'use client'; 
 
-import Link from "next/link";
-import {
-  FaHome,
-  FaGraduationCap,
-  FaChalkboardTeacher,
-  FaUsers,
-} from "react-icons/fa";
+import Link from 'next/link';
+import { Home, User, CalendarDays, BookOpen, FileText } from 'lucide-react';
+import { usePathname } from 'next/navigation';
+import Image from 'next/image';
 
-export default function Sidebar() {
-  const menuItems = [
-    { name: "Halaman Utama", href: "/admin/dashboard", icon: <FaHome /> },
-    { name: "Mahasiswa", href: "/admin/mahasiswa", icon: <FaGraduationCap /> },
-    { name: "Dosen", href: "/admin/dosen", icon: <FaChalkboardTeacher /> },
-    { name: "Daftar Pengguna", href: "/admin/pengguna", icon: <FaUsers /> },
-  ];
 
-  return (
-    <aside className="fixed top-0 left-0 h-full w-[250px] bg-[#1d4f91] text-white flex flex-col justify-between shadow-lg">
-      <div>
-        <div className="py-6 text-center border-b border-white/20">
-          <h1 className="text-xl font-bold tracking-wide">Admin Panel</h1>
-        </div>
+// Asumsi: Logo diletakkan di public/logo-sigta.png
+// Kita akan membuat komponen Logo-nya di dalam file Sidebar ini agar tidak perlu import dari Shared
+const Logo = () => (
+    <div className="flex items-center justify-center p-4">
+        <Image
+            src="/logo-sigta.png" // Path ke file logo Anda di folder public
+            alt="Logo SIGTA"
+            width={94}
+            height={694}
+            className="object-contain" 
+        />
+    </div>
+);
 
-        <nav className="mt-6">
-          <ul className="flex flex-col gap-2 px-4">
-            {menuItems.map((item) => (
-              <li key={item.name}>
-                <Link
-                  href={item.href}
-                  className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-[#305ea8] transition duration-200"
-                >
-                  <span className="text-lg">{item.icon}</span>
-                  <span>{item.name}</span>
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </nav>
-      </div>
+// --- PERUBAHAN DI SINI UNTUK MENYESUAIKAN DENGAN LABEL DI GAMBAR ---
+const navItems = [
+    // Halaman Utama
+    // Menggunakan ikon Home dan label 'Halaman Utama'
+    { icon: Home, label: 'Halaman Utama', href: '/admin/dashboard' },
+    // Mahasiswa
+    // Menggunakan ikon User (atau ikon lain yang relevan) dan label 'Mahasiswa'
+    { icon: User, label: 'Mahasiswa', href: '/admin/mahasiswa' },
+    // Dosen
+    // Menggunakan ikon User (atau ikon lain yang relevan) dan label 'Dosen'
+    { icon: User, label: 'Dosen', href: '/admin/dosen' },
+    // Daftar Pengguna
+    // Menggunakan ikon User (atau ikon lain yang lebih sesuai, seperti UserGroup jika ada) dan label 'Daftar Pengguna'
+    { icon: User, label: 'Daftar Pengguna', href: '/admin/pengguna' },
+];
+// -------------------------------------------------------------------
 
-      <div className="text-center mb-6 text-sm text-white/70">
-        <p>© 2025 Sistem Akademik</p>
-        <p className="hover:text-white transition">About us</p>
-      </div>
-    </aside>
-  );
-}
+export const Sidebar = () => {
+    const pathname = usePathname();
+
+    // Fungsi pengecekan khusus untuk Dashboard karena bisa diakses via '/dosen' atau '/dosen/dashboard'
+    const isDashboardActive = pathname === '/admin/dashboard' || pathname === '/admin';
+    // Pengecekan untuk Profile
+    const isProfileActive = pathname.startsWith('/admin/profile');
+
+    return (
+        // Menggunakan flex-shrink-0 dan min-h-full agar sidebar mengikuti layout di bawah header
+        <aside className="w-64 bg-blue-300 flex-shrink-0 text-black shadow-xl flex flex-col justify-between z-10 font-serif min-h-full">
+            
+            {/* Logo/Nama Aplikasi */}
+            <div className="p-4 pt-8 text-center">
+                {/* --- PENAMBAHAN KODE: PENGGUNAAN KOMPONEN LOGO --- */}
+                <Logo />
+            </div>
+
+            <div className="pt-2 flex-grow">
+                {navItems.map((item) => {
+                    const Icon = item.icon;
+                    
+                    // Tentukan status aktif
+                    const isActive = item.href === '/admin/dashboard' ? isDashboardActive : pathname.startsWith(item.href);
+
+                    return (
+                        <Link 
+                            key={item.label}
+                            href={item.href}
+                            className={`flex items-center p-4 transition-colors text-lg font-medium 
+                                ${isActive 
+                                    ? 'bg-white border-r-4 border-white font-bold' // Status Aktif
+                                    : 'hover:bg-white' // Status Hover
+                                }
+                            `}
+                        >
+                            <Icon className="w-6 h-6 mr-4" />
+                            <span>{item.label}</span>
+                        </Link>
+                    );
+                })}
+                
+                
+            </div>
+            
+            {/* About Us Placeholder */}
+            <div className="p-4 text-sm text--300">
+                About us
+            </div>
+        </aside>
+    );
+};

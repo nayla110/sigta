@@ -1,95 +1,73 @@
-"use client";
+'use client'; 
 
-import React from "react";
-import Link from "next/link";
-import {
-  FaHome,
-  FaGraduationCap,
-  FaChalkboardTeacher,
-  FaUsers,
-} from "react-icons/fa";
+import { Sidebar } from '@/components/admin/Sidebar'; // Tetap menggunakan komponen Sidebar Anda
+import { LogoutButton } from '@/components/dosen/LogoutButton';
+import { Bell, User } from 'lucide-react';
+import { usePathname } from 'next/navigation';
+import Link from 'next/link';
+
+// Fungsi untuk mendapatkan judul (tetap)
+const getHeaderTitle = (pathname: string) => {
+    // Menyesuaikan logika judul untuk halaman Admin
+    if (pathname.startsWith('/admin/dashboard') || pathname === '/admin') return 'Selamat Datang Admin';
+    if (pathname.startsWith('/admin/mahasiswa')) return 'Kelola Akun Mahasiswa';
+    if (pathname.startsWith('/admin/dosen')) return 'Kelola Akun Dosen';
+    if (pathname.startsWith('/admin/pengguna')) return 'Daftar Pengguna Sistem';
+  return 'SIGTA Admin';
+};
 
 export default function AdminLayout({
-  children,
+    children,
 }: {
-  children: React.ReactNode;           
+    children: React.ReactNode;
 }) {
+    const pathname = usePathname();
+    const title = getHeaderTitle(pathname);
+
+  // TEMA HEADER BARU: Biru Tua, sesuai gambar
+  // Catatan: Ini akan membuat Header BIRU di SEMUA HALAMAN, bukan putih.
+  const headerBg = 'bg-blue-900'; // Warna Biru Sidebar
+  const titleColor = 'text-white'; // Judul Putih
+  const shadow = 'shadow-xl';
+
+  const HeaderAction = (
+    <div className="flex items-center space-x-4">
+      {/* Lonceng */}
+      <div className="relative cursor-pointer">
+        <Bell className="w-8 h-8 text-yellow-300" fill="#fde047" /> 
+        <span className="absolute top-0 right-0 block h-3 w-3 rounded-full ring-2 ring-white bg-red-600"></span>
+      </div>
+      
+      {/* Tombol Logout */}
+      <LogoutButton /> 
+    </div>
+  );
+
   return (
-    <div className="min-h-screen flex bg-[#f5f8ff]">
-      {/* SIDEBAR */}
-      <aside className="fixed top-0 left-0 h-full w-[220px] bg-[#1d4f91] text-black flex flex-col justify-between shadow-lg">
-        <div>
-         <div className="items-center justify-center">
-  <img
-    src="/icons/logo.png"
-    alt="logo"
-    className="w-60 h-25 object-contain"
-  />
-          </div>
-
-          <nav className="mt-6">
-            <ul className="flex flex-col gap-2 px-4">
-              <li>
-                <Link
-                  href="/admin/dashboard"
-                  className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-[#305ea8] transition duration-200"
-                >
-                  <FaHome className="text-lg" />
-                  <span>Halaman Utama</span>
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/admin/mahasiswa"
-                  className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-[#305ea8] transition duration-200"
-                >
-                  <FaGraduationCap className="text-lg" />
-                  <span>Mahasiswa</span>
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/admin/dosen"
-                  className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-[#305ea8] transition duration-200"
-                >
-                  <FaChalkboardTeacher className="text-lg" />
-                  <span>Dosen</span>
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/admin/pengguna"
-                  className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-[#305ea8] transition duration-200"
-                >
-                  <FaUsers className="text-lg" />
-                  <span>Daftar Pengguna</span>
-                </Link>
-              </li>
-            </ul>
-          </nav>
+    <div className="flex flex-col min-h-screen">
+      {/* --- BAGIAN 1: HEADER PENUH --- */}
+      <header className={`flex justify-between items-center p-4 px-8 sticky top-0 z-20 ${headerBg} ${shadow} w-full`}>
+        <h1 className={`text-2xl font-gentium ${titleColor}`}>
+          {title}
+        </h1>
+        
+        <div className="flex items-center space-x-6"> 
+          {HeaderAction}
         </div>
+      </header>
 
-         <div className="px-6 py-4 text-sm opacity-80 text-center">
-          <Link href="https://www.polibatam.ac.id/" >About us </Link>
-        </div>
-      </aside>
-
-      {/* MAIN CONTENT */}
-      <div className="flex-1 ml-[250px] flex flex-col min-h-screen">
-        {/* HEADER */}
-        <header className="flex justify-between items-center bg-white px-10 py-4 shadow-sm border-b border-gray-200">
-          <h1 className="text-lg font-semibold text-gray-700">
-            Selamat Datang Admin
-          </h1>
-          
-          <button className="bg-[#dc2626] hover:bg-[#b91c1c] text-white font-medium px-4 py-2 rounded-lg shadow-md transition duration-200">
-            Keluar
-          </button>
-
-        </header>
-
-        {/* MAIN SECTION */}
-        <main className="flex-1 p-10 bg-[#f5f8ff]">{children}</main>
+      {/* --- BAGIAN 2: SIDEBAR dan CONTENT (di bawah Header) --- */}
+      <div className="flex flex-1">
+        
+        {/* Sidebar (Fixed di Kiri) */}
+        {/* Catatan: Kita ganti fixed jadi sticky atau biarkan static karena Header sudah fixed/sticky */}
+        <Sidebar /> {/* Sidebar sudah menggunakan w-64 */}
+        
+        {/* Main Content Area */}
+        {/* Gunakan w-full dan overflow-y-auto untuk konten yang panjang */}
+        <main className="flex-1 p-8 bg-gray-50">
+          {children}
+        </main>
       </div>
     </div>
   );
