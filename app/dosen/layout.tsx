@@ -1,83 +1,130 @@
-'use client'; 
+'use client';
 
 import { Sidebar } from '@/components/dosen/Sidebar';
-import { LogoutButton } from '@/components/dosen/LogoutButton';
 import { Bell, User } from 'lucide-react';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { useEffect, useRef, useState } from 'react';
 
-// Fungsi untuk mendapatkan judul (tetap)
+// Tentukan judul header berdasarkan path
 const getHeaderTitle = (pathname: string) => {
   if (pathname.startsWith('/dosen/profile')) return 'Profil Dosen';
-  if (pathname.startsWith('/dosen/dashboard') || pathname === '/dosen') return 'Selamat Datang';
+  if (pathname.startsWith('/dosen/setting')) return 'Pengaturan Akun';
+  if (pathname.startsWith('/dosen/dashboard') || pathname === '/dosen')
+    return 'Selamat Datang';
   if (pathname.startsWith('/dosen/pengajuan')) return 'Pengajuan Bimbingan';
   if (pathname.startsWith('/dosen/jadwal')) return 'Jadwal Bimbingan';
   if (pathname.startsWith('/dosen/dokumen')) return 'Dokumen Tugas Akhir';
   return 'SIGTA Dosen';
 };
 
-export default function DosenLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function DosenLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const title = getHeaderTitle(pathname); 
+  const router = useRouter();
+  const title = getHeaderTitle(pathname);
 
-  // TEMA HEADER BARU: Biru Tua, sesuai gambar
-  // Catatan: Ini akan membuat Header BIRU di SEMUA HALAMAN, bukan putih.
-  const headerBg = 'bg-blue-900'; // Warna Biru Sidebar
-  const titleColor = 'text-white'; // Judul Putih
-  const shadow = 'shadow-xl';
+  // Tampilkan ikon di header hanya pada dashboard (opsional)
+  const isDashboard = pathname === '/dosen' || pathname.startsWith('/dosen/dashboard');
 
-  const HeaderAction = (
-    <div className="flex items-center space-x-4">
-      {/* Lonceng */}
-      <div className="relative cursor-pointer">
-        <Bell className="w-8 h-8 text-yellow-300" fill="#fde047" /> 
-        <span className="absolute top-0 right-0 block h-3 w-3 rounded-full ring-2 ring-white bg-red-600"></span>
-      </div>
+  // Dropdown user
+  const [openUser, setOpenUser] = useState(false);
+  const userRef = useRef<HTMLDivElement>(null);
 
-      {/* Foto Profil */}
-      <Link href="/dosen/profile" className="cursor-pointer">
-        <div className={`w-10 h-10 rounded-full flex items-center justify-center 
-                        bg-gray-200 text-gray-700 transition-shadow hover:shadow-lg border-2
-                        ${pathname.startsWith('/dosen/profile') ? 'border-yellow-300' : 'border-transparent'}`}
-        >
-          <User className="w-6 h-6" /> 
-        </div>
-      </Link>
-      
-      {/* Tombol Logout */}
-      <LogoutButton /> 
-    </div>
-  );
+  // Tutup dropdown saat klik di luar / tekan ESC
+  useEffect(() => {
+    const onDown = (e: MouseEvent) => {
+      if (userRef.current && !userRef.current.contains(e.target as Node)) setOpenUser(false);
+    };
+    const onEsc = (e: KeyboardEvent) => e.key === 'Escape' && setOpenUser(false);
+    document.addEventListener('mousedown', onDown);
+    document.addEventListener('keydown', onEsc);
+    return () => {
+      document.removeEventListener('mousedown', onDown);
+      document.removeEventListener('keydown', onEsc);
+    };
+  }, []);
+
+  // Logout + notifikasi
+  const logout = () => {
+    setOpenUser(false);
+    alert('Anda telah keluar dari sistem.');
+    router.push('/login');
+    // Jika ingin versi konfirmasi:
+    // if (window.confirm('Anda telah keluar dari sistem.')) router.push('/login');
+  };
 
   return (
     <div className="flex flex-col min-h-screen">
-      {/* --- BAGIAN 1: HEADER PENUH --- */}
-      <header className={`flex justify-between items-center p-4 px-8 sticky top-0 z-20 ${headerBg} ${shadow} w-full`}>
-        <h1 className={`text-2xl font-gentium ${titleColor}`}>
+      {/* HEADER */}
+      <header className="flex items-center sticky top-0 z-20 w-full px-8 py-4 bg-blue-900 shadow-xl">
+        {/* Judul di kiri */}
+        <h1 className="text-2xl font-semibold tracking-wide font-gentium text-white">
           {title}
         </h1>
-        
-        <div className="flex items-center space-x-6"> 
-          {HeaderAction}
-        </div>
+
+        {/* Spacer */}
+        <div className="flex-1" />
+
+        {/* Ikon kanan (opsional di dashboard) */}
+        {isDashboard && (
+          <div className="flex items-center gap-6">
+            {/* Bell */}
+            <div className="relative cursor-pointer">
+              <Bell className="w-8 h-8 text-yellow-300" />
+              <span className="absolute top-0 right-0 block h-3 w-3 rounded-full ring-2 ring-white bg-red-600" />
+            </div>
+
+            {/* User dropdown */}
+            <div className="relative" ref={userRef}>
+              <button
+                onClick={() => setOpenUser(v => !v)}
+                className="flex items-center gap-2 p-1 rounded-full hover:bg-blue-800 transition"
+                aria-haspopup="menu"
+                aria-expanded={openUser}
+                aria-label="Menu pengguna"
+              >
+                <User className="w-8 h-8 text-white" />
+              </button>
+
+              {openUser && (
+                <div
+                  className="absolute right-0 mt-3 w-48 rounded-lg border bg-white text-gray-800 shadow-md overflow-hidden z-50"
+                  role="menu"
+                >
+                  <Link
+                    href="/dosen/profile"
+                    className="block px-4 py-2 text-sm hover:bg-gray-100"
+                    role="menuitem"
+                    onClick={() => setOpenUser(false)}
+                  >
+                    Profil
+                  </Link>
+                  <Link
+                    href="/dosen/setting"
+                    className="block px-4 py-2 text-sm hover:bg-gray-100"
+                    role="menuitem"
+                    onClick={() => setOpenUser(false)}
+                  >
+                    Pengaturan
+                  </Link>
+                  <button
+                    onClick={logout}
+                    className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100 border-t"
+                    role="menuitem"
+                  >
+                    Keluar
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
       </header>
 
-      {/* --- BAGIAN 2: SIDEBAR dan CONTENT (di bawah Header) --- */}
+      {/* SIDEBAR + CONTENT */}
       <div className="flex flex-1">
-        
-        {/* Sidebar (Fixed di Kiri) */}
-        {/* Catatan: Kita ganti fixed jadi sticky atau biarkan static karena Header sudah fixed/sticky */}
-        <Sidebar /> {/* Sidebar sudah menggunakan w-64 */}
-        
-        {/* Main Content Area */}
-        {/* Gunakan w-full dan overflow-y-auto untuk konten yang panjang */}
-        <main className="flex-1 p-8 bg-gray-50">
-          {children}
-        </main>
+        <Sidebar />
+        <main className="flex-1 p-8 bg-gray-50 overflow-y-auto">{children}</main>
       </div>
     </div>
   );

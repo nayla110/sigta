@@ -41,7 +41,7 @@ export const Sidebar = () => {
 
   return (
     // Menggunakan flex-shrink-0 dan min-h-full agar sidebar mengikuti layout di bawah header
-    <aside className="w-64 bg-blue-300 flex-shrink-0 text-black shadow-xl flex flex-col justify-between z-10 font-serif min-h-full">
+    <aside className="w-64 bg-blue-300  text-black shadow-xl flex flex-col justify-between z-10 font-serif min-h-full">
       
       {/* Logo/Nama Aplikasi */}
       <div className="p-4 pt-8 text-center">
@@ -49,7 +49,7 @@ export const Sidebar = () => {
         <Logo />
       </div>
 
-      <div className="pt-2 flex-grow">
+      <div className="pt-2 flex-1 flex flex-col px-3 py-4 space-y-2">
         {navItems.map((item) => {
           const Icon = item.icon;
           
@@ -60,14 +60,14 @@ export const Sidebar = () => {
             <Link 
               key={item.label}
               href={item.href}
-              className={`flex items-center p-4 transition-colors text-lg font-medium 
+              className={`flex items-center gap-3 px-4 py-3 rounded-md transition 
                 ${isActive 
-                  ? 'bg-white border-r-4 border-white font-bold' // Status Aktif
-                  : 'hover:bg-white' // Status Hover
+                  ? 'bg-white text-black font-medium'
+                    : 'hover:bg-blue-200 hover:text-black'
                 }
               `}
             >
-              <Icon className="w-6 h-6 mr-4" />
+              <Icon className="w-5 h-5" />
               <span>{item.label}</span>
             </Link>
           );
@@ -77,9 +77,9 @@ export const Sidebar = () => {
       </div>
       
       {/* About Us Placeholder */}
-      <div className="p-4 text-sm text--300">
-        About us
-      </div>
+      <Link href="https://www.polibatam.ac.id/" className="underline">
+            About us
+          </Link>
     </aside>
   );
 };

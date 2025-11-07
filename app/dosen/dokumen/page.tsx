@@ -55,7 +55,7 @@ export default function DokumenTugasAkhirPage() {
         {/* Kita duplikat kartu untuk meniru tampilan scrollable */}
         {[1, 2, 3, 4].map(index => (
           // MENGURANGI LEBAR KARTU MAHASISWA (w-72 atau w-64)
-          <div key={index} className="flex-shrink-0 w-72"> 
+          <div key={index} className="w-72"> 
             <StudentCard {...dummyStudent} nama={`Mahasiswa ${index}`} />
           </div>
         ))}

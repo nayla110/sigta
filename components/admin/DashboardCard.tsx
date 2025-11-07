@@ -8,7 +8,7 @@ type DashboardCardProps = {
 export default function DashboardCard({ title, value }: DashboardCardProps) {
   return (
     <div className="
-      bg-gradient-to-br from-[#5ba6ff] to-[#3c8efc]
+      from-[#5ba6ff] to-[#3c8efc]
       text-white text-center rounded-2xl p-6 
       shadow-lg hover:shadow-2xl transition-all duration-300 
       transform hover:-translate-y-1

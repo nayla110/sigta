@@ -1,66 +1,68 @@
 'use client';
 
-import { User } from 'lucide-react';
+import { User } from "lucide-react";
 
-// Data Dummy
-const initialData = {
-  nama: 'Dr. Budi Santoso',
-  nik: '197501012003121001',
-  prodi: 'D3 Teknik Informatika',
-  email: 'budi.santoso@poltek.ac.id',
-  noTelp: '0812-3456-7890',
+const dosen = {
+  nama: "Noper Ardi, S.Pd., M.Eng",
+  nik: "122277",
+  prodi: "Teknologi Rekayasa Perangkat Lunak",
+  email: "budi.santoso@poltek.ac.id",
+  noTelp: "085376166392",
 };
 
-export const ProfileForm = () => {
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    alert('Data Berhasil Diubah! (Simulasi)');
+export default function ProfileForm() {
+  const handleEdit = () => {
+    alert("Fitur edit masih simulasi.");
   };
 
-  const InputField = ({ label, value, name }: { label: string, value: string, name: string }) => (
-    <div className="mb-4">
-      <label className="block text-gray-700 font-serif font-medium mb-1">{label}</label>
-      <input
-        type="text"
-        name={name}
-        defaultValue={value}
-        className="w-full p-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 transition duration-150"
-      />
+  return (
+    <div className="max-w-6xl mx-auto p-6 font-serif">
+      <h1 className="text-2xl font-semibold mb-6">Profil Dosen</h1>
+
+      <div className="flex gap-8 bg-white shadow-lg p-6 rounded-lg border border-gray-200">
+        
+        {/* Foto Profil */}
+        <div className="w-48 h-60 bg-gray-200 rounded-md overflow-hidden">
+          <img
+            src="/icons/dosen.png"
+            alt="Foto Profil"
+            className="w-full h-full object-cover"
+          />
+        </div>
+
+        {/* DATA DOSEN */}
+        <div className="flex-1">
+          <table className="table-auto w-full text-sm">
+            <tbody>
+              <tr className="border-b">
+                <td className="py-3 font-medium w-40">Nama</td>
+                <td className="px-2">:</td>
+                <td>{dosen.nama}</td>
+              </tr>
+              <tr className="border-b">
+                <td className="py-3 font-medium">NIK</td>
+                <td className="px-2">:</td>
+                <td>{dosen.nik}</td>
+              </tr>
+              <tr className="border-b">
+                <td className="py-3 font-medium">Program Studi</td>
+                <td className="px-2">:</td>
+                <td>{dosen.prodi}</td>
+              </tr>
+              <tr className="border-b">
+                <td className="py-3 font-medium">Email</td>
+                <td className="px-2">:</td>
+                <td>{dosen.email}</td>
+              </tr>
+              <tr>
+                <td className="py-3 font-medium">No. Telp</td>
+                <td className="px-2">:</td>
+                <td>{dosen.noTelp}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
   );
-
-  return (
-    <form onSubmit={handleSubmit} className="flex gap-10">
-      
-      {/* Bagian Kiri: Avatar */}
-      <div className="flex-shrink-0 pt-10">
-        <div className="w-40 h-40 bg-gray-300 rounded-full flex items-center justify-center border-4 border-gray-200">
-          <User className="w-24 h-24 text-gray-500" />
-        </div>
-      </div>
-
-      {/* Bagian Kanan: Form Data Card */}
-      <div className="flex-grow bg-white p-8 rounded-2xl shadow-xl border border-gray-100 max-w-lg">
-        <div className="space-y-4">
-          
-          <InputField label="Nama" value={initialData.nama} name="nama" />
-          <InputField label="NIK" value={initialData.nik} name="nik" />
-          <InputField label="Program Studi" value={initialData.prodi} name="prodi" />
-          <InputField label="Email" value={initialData.email} name="email" />
-          <InputField label="No Telp" value={initialData.noTelp} name="noTelp" />
-          
-        </div>
-
-        {/* Tombol Ubah */}
-        <div className="flex justify-end mt-6">
-          <button
-            type="submit"
-            className="px-6 py-2 bg-blue-500 text-white font-semibold rounded-lg hover:bg-blue-600 transition duration-150 shadow-md shadow-blue-300"
-          >
-            Ubah
-          </button>
-        </div>
-      </div>
-    </form>
-  );
-};
+}
