@@ -1,11 +1,9 @@
-'use client'; 
+'use client';
 
 import { StudentCard } from '@/components/dosen/StudentCard';
 import { DocumentHistory } from '@/components/dosen/DocumentHistory';
 import { Search, FileText } from 'lucide-react';
 
-// --- DATA DUMMY (Tetap Sama) ---
-// ... (dummyStudent dan dummyDocumentHistory)
 const dummyStudent = {
   nim: '3312411089',
   nama: 'Elsya Ananda Putri',
@@ -24,23 +22,22 @@ const dummyDocumentHistory = [
 ];
 
 export default function DokumenTugasAkhirPage() {
-  
   const handleKirimReview = () => {
     alert("Review berhasil dikirim!");
   };
 
   return (
-    <div className="p-4">
-      {/* Header Halaman (Nama Mahasiswa & Search) */}
-      <div className="flex justify-between items-center mb-8 border-b pb-4">
+    <div className="p-4 border-b pb-4">
+
+      {/* Header */}
+      <div className="flex justify-between items-center mb-8">
         <div>
           <h1 className="text-2xl font-serif font-bold text-gray-800">Nama Mahasiswa</h1>
           <p className="text-sm text-gray-500">Ini adalah semua data mahasiswa bimbingan anda</p>
         </div>
-        
-        {/* Search Bar Samping Judul */}
-        {/* Memastikan lebar Search Bar tidak terlalu dominan (max-w-xs) */}
-        <div className="relative w-full max-w-xs ml-8"> 
+
+        {/* Search Bar */}
+        <div className="relative w-full max-w-xs ml-8">
           <input
             type="text"
             placeholder="Cari Mahasiswa..."
@@ -50,31 +47,26 @@ export default function DokumenTugasAkhirPage() {
         </div>
       </div>
 
-      {/* --- BAGIAN 1: STUDENT CARDS (Horizontal Scroll) --- */}
-      <div className="flex overflow-x-auto space-x-4 pb-4 mb-8"> {/* Mengurangi space-x dari 6 ke 4 */}
-        {/* Kita duplikat kartu untuk meniru tampilan scrollable */}
+      {/* Student Cards */}
+      <div className="flex overflow-x-auto space-x-4 pb-4 mb-8">
         {[1, 2, 3, 4].map(index => (
-          // MENGURANGI LEBAR KARTU MAHASISWA (w-72 atau w-64)
-          <div key={index} className="w-72"> 
+          <div key={index} className="w-72">
             <StudentCard {...dummyStudent} nama={`Mahasiswa ${index}`} />
           </div>
         ))}
       </div>
 
-      {/* --- BAGIAN 2: STATUS, JUDUL, dan REVIEW DOKUMEN --- */}
-      {/* Menggunakan gap-6 (mengurangi dari gap-8) dan memastikan grid responsif */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6"> 
-        
-        {/* Kolom Kiri (Status & Judul TA) - col-span-1 */}
+      {/* Grid Layout */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+        {/* Status & Judul */}
         <div className="col-span-1 space-y-6">
-          
-          {/* Status Saat Ini */}
+
           <div className="bg-blue-800 p-6 rounded-xl shadow-lg text-white">
             <h3 className="text-lg font-light mb-2">STATUS SAAT INI:</h3>
             <p className="text-4xl font-bold">BAB 4</p>
           </div>
 
-          {/* Judul TA */}
           <div className="bg-blue-800 p-6 rounded-xl shadow-lg text-white">
             <h3 className="text-lg font-light mb-2">JUDUL TA:</h3>
             <p className="text-xl font-bold leading-snug">
@@ -83,15 +75,13 @@ export default function DokumenTugasAkhirPage() {
           </div>
         </div>
 
-        {/* Kolom Kanan (Review Dokumen & Riwayat) - col-span-2 */}
-        <div className="lg:col-span-2 col-span-1"> 
-          
-          {/* Review Dokumen Terbaru */}
+        {/* Review & Riwayat */}
+        <div className="lg:col-span-2 col-span-1">
+
           <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-200">
-            {/* File Review Terbaru */}
             <div className="flex justify-between items-center mb-4 pb-4 border-b">
               <div className="flex items-center">
-                <FileText className="w-6 h-6 mr-3 text-gray-600" /> 
+                <FileText className="w-6 h-6 mr-3 text-gray-600" />
                 <div>
                   <h4 className="font-semibold text-gray-800">Draft_Bab_4_Final.pdf</h4>
                   <p className="text-xs text-gray-500">Kamis, 09/10/2025</p>
@@ -99,7 +89,6 @@ export default function DokumenTugasAkhirPage() {
               </div>
             </div>
 
-            {/* Form Review */}
             <div className="space-y-3">
               <label className="text-sm font-medium text-gray-700 block">Isi Review</label>
               <textarea
@@ -118,8 +107,7 @@ export default function DokumenTugasAkhirPage() {
               </button>
             </div>
           </div>
-          
-          {/* Riwayat Dokumen Masuk (Menggunakan Komponen) */}
+
           <DocumentHistory history={dummyDocumentHistory} />
         </div>
       </div>
