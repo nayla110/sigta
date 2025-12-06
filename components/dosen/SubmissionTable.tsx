@@ -1,6 +1,6 @@
 'use client';
 
-import { CheckCircle, XCircle } from 'lucide-react'; // Import ikon Terima & Tolak
+import { CheckCircle, XCircle } from 'lucide-react';
 
 // Data dummy untuk contoh tabel
 const dummySubmissions = [
@@ -8,6 +8,7 @@ const dummySubmissions = [
     no: 1,
     mahasiswa: 'Elsya Ananda Putri (3312411089)',
     prodi: 'D3 Teknik Informatika',
+    jenisBimbingan: 'Proposal',
     judulTA: 'Sistem Informasi Absensi Pegawai',
     ruangan: 'Online',
     tanggalWaktu: '2025-10-26, 10:00',
@@ -16,6 +17,7 @@ const dummySubmissions = [
     no: 2,
     mahasiswa: 'Elsya Ananda Putri (3312411089)',
     prodi: 'S2 Teknik Komputer',
+    jenisBimbingan: 'TA',
     judulTA: 'Analisis Keamanan Jaringan IoT',
     ruangan: 'Offline (Lab Komputer)',
     tanggalWaktu: '2025-10-27, 14:00',
@@ -24,6 +26,7 @@ const dummySubmissions = [
     no: 3,
     mahasiswa: 'Elsya Ananda Putri (3312411089)',
     prodi: 'S2 Teknik Komputer',
+    jenisBimbingan: 'Proposal',
     judulTA: 'Analisis Keamanan Jaringan IoT',
     ruangan: 'Offline (Lab Komputer)',
     tanggalWaktu: '2025-10-27, 14:00',
@@ -32,6 +35,7 @@ const dummySubmissions = [
     no: 4,
     mahasiswa: 'Elsya Ananda Putri (3312411089)',
     prodi: 'S2 Teknik Komputer',
+    jenisBimbingan: 'TA',
     judulTA: 'Analisis Keamanan Jaringan IoT',
     ruangan: 'Offline (Lab Komputer)',
     tanggalWaktu: '2025-10-27, 14:00',
@@ -40,14 +44,14 @@ const dummySubmissions = [
     no: 5,
     mahasiswa: 'Elsya Ananda Putri (3312411089)',
     prodi: 'S2 Teknik Komputer',
+    jenisBimbingan: 'Proposal',
     judulTA: 'Analisis Keamanan Jaringan IoT',
     ruangan: 'Offline (Lab Komputer)',
     tanggalWaktu: '2025-10-27, 14:00',
   },
-  // Tambahkan data dummy lainnya jika perlu
 ];
 
-export const SubmissionTable = () => {
+export default function SubmissionTable() {
   const handleAccept = (submissionId: number) => {
     alert(`Mengajukan persetujuan untuk pengajuan No. ${submissionId}`);
     // TODO: Implementasi logika untuk menerima pengajuan (API call)
@@ -73,6 +77,9 @@ export const SubmissionTable = () => {
               Program Studi
             </th>
             <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
+              Jenis Bimbingan
+            </th>
+            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
               Judul TA
             </th>
             <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
@@ -92,6 +99,15 @@ export const SubmissionTable = () => {
               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-800">{submission.no}</td>
               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-800">{submission.mahasiswa}</td>
               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-800">{submission.prodi}</td>
+              <td className="px-6 py-4 whitespace-nowrap text-sm">
+                <span className={`px-3 py-1 rounded-full font-medium ${
+                  submission.jenisBimbingan === 'Proposal' 
+                    ? 'bg-purple-100 text-purple-700' 
+                    : 'bg-green-100 text-green-700'
+                }`}>
+                  {submission.jenisBimbingan}
+                </span>
+              </td>
               <td className="px-6 py-4 text-sm text-gray-800">{submission.judulTA}</td>
               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-800">{submission.ruangan}</td>
               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-800">{submission.tanggalWaktu}</td>
@@ -119,4 +135,4 @@ export const SubmissionTable = () => {
       </table>
     </div>
   );
-};
+}

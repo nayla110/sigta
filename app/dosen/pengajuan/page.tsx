@@ -1,4 +1,4 @@
-import { SubmissionTable } from '@/components/dosen/SubmissionTable';
+import SubmissionTable from '@/components/dosen/SubmissionTable'; // Tanpa kurung kurawal
 import { FileText } from 'lucide-react';
 
 export default function PengajuanBimbinganPage() {
@@ -9,7 +9,6 @@ export default function PengajuanBimbinganPage() {
         Pengajuan Bimbingan Mahasiswa
       </h2>
 
-      {/* Komponen Tabel Pengajuan */}
       <SubmissionTable />
     </div>
   );
