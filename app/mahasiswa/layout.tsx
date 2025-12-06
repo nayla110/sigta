@@ -14,6 +14,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     if (pathname?.includes('/TA')) return 'Tugas Akhir';
     if (pathname?.includes('/profil')) return 'Profil Mahasiswa';
     if (pathname?.includes('/setting')) return 'Pengaturan Akun';
+    if (pathname?.includes('/proposal')) return 'Proposal';
     return 'Selamat Datang Mahasiswa';
   };
 
@@ -140,6 +141,20 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 <span>Bimbingan</span>
               </Link>
             </li>
+            
+            <li>
+              <Link
+                href="/mahasiswa/proposal"
+                className={`flex items-center gap-3 px-4 py-3 rounded-md transition ${
+                  pathname?.startsWith('/mahasiswa/proposal')
+                    ? 'bg-white text-black font-medium'
+                    : 'hover:bg-[#B9D8FF] hover:text-black'
+                }`}
+              >
+                <BookOpen className="w-5 h-5" />
+                <span>Proposal</span>
+              </Link>
+            </li>
 
             <li>
               <Link
@@ -154,6 +169,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 <span>Tugas Akhir</span>
               </Link>
             </li>
+
+          
           </ul>
         </nav>
 

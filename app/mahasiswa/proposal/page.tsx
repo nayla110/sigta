@@ -15,9 +15,9 @@ type Row = {
 };
 
 export default function Page() {
-  const [open, setOpen] = useState<boolean[]>([true, false]);
+  const [open, setOpen] = useState<boolean[]>([true, false, false, false]);
   const [forms, setForms] = useState<BabForm[]>(
-    Array.from({ length: 2 }, () => ({ file: null, note: '' }))
+    Array.from({ length: 4 }, () => ({ file: null, note: '' }))
   );
   const [rows, setRows] = useState<Row[]>([]);
 
@@ -43,7 +43,7 @@ export default function Page() {
     }
 
     const newRow: Row = {
-      bab: `BAB ${idx + 4}`,
+      bab: `BAB ${idx + 1}`,
       filename: entry.file.name,
       note: entry.note || '-',
       komentar: '',
@@ -58,14 +58,14 @@ export default function Page() {
     <div className="max-w-6xl mx-auto space-y-6">
       {/* Upload form untuk tiap BAB */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {Array.from({ length: 2 }).map((_, idx) => (
+        {Array.from({ length: 3 }).map((_, idx) => (
           <div key={idx} className="space-y-3">
             <div
               className="inline-flex items-center gap-3 bg-blue-100 rounded-full px-4 py-2 cursor-pointer select-none"
               onClick={() => toggle(idx)}
             >
               <div className="text-xl font-bold text-blue-700">+</div>
-              <div className="font-semibold">Tambahkan Bab {idx + 4}</div>
+              <div className="font-semibold">Tambahkan Bab {idx + 1}</div>
             </div>
 
             <div className="bg-white border rounded-2xl p-6 shadow-sm">
