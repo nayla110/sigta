@@ -20,7 +20,6 @@ const Logo = () => (
     </div>
 );
 
-// --- PERUBAHAN DI SINI UNTUK MENYESUAIKAN DENGAN LABEL DI GAMBAR ---
 const navItems = [
     // Halaman Utama
     // Menggunakan ikon Home dan label 'Halaman Utama'
@@ -35,57 +34,57 @@ const navItems = [
     // Menggunakan ikon User (atau ikon lain yang lebih sesuai, seperti UserGroup jika ada) dan label 'Daftar Pengguna'
     { icon: User, label: 'Daftar Pengguna', href: '/admin/pengguna' },
 ];
-// -------------------------------------------------------------------
+
 
 export const Sidebar = () => {
-    const pathname = usePathname();
+  const pathname = usePathname();
 
-    // Fungsi pengecekan khusus untuk Dashboard karena bisa diakses via '/dosen' atau '/dosen/dashboard'
-    const isDashboardActive = pathname === '/admin/dashboard' || pathname === '/admin';
-    // Pengecekan untuk Profile
-    const isProfileActive = pathname.startsWith('/admin/profile');
+  // Fungsi pengecekan khusus untuk Dashboard karena bisa diakses via '/dosen' atau '/dosen/dashboard'
+  const isDashboardActive = pathname === '/admin/dashboard' || pathname === '/admin';
+  // Pengecekan untuk Profile
+  const isProfileActive = pathname.startsWith('/admin/profile');
 
-    return (
-        // Menggunakan flex-shrink-0 dan min-h-full agar sidebar mengikuti layout di bawah header
-        <aside className="w-64 bg-blue-300 text-black shadow-xl flex flex-col justify-between z-10 font-serif min-h-full">
-            
-            {/* Logo/Nama Aplikasi */}
-            <div className="p-4 pt-8 text-center">
-                {/* --- PENAMBAHAN KODE: PENGGUNAAN KOMPONEN LOGO --- */}
-                <Logo />
-            </div>
+  return (
+    // Menggunakan flex-shrink-0 dan min-h-full agar sidebar mengikuti layout di bawah header
+    <aside className="w-64 bg-blue-300  text-black shadow-xl flex flex-col justify-between z-10 font-serif min-h-full">
+      
+      {/* Logo/Nama Aplikasi */}
+      <div className="p-4 pt-8 text-center">
+        {/* --- PENAMBAHAN KODE: PENGGUNAAN KOMPONEN LOGO --- */}
+        <Logo />
+      </div>
 
-            <div className="pt-2 flex-1 flex flex-col px-3 py-4 space-y-2">
-                {navItems.map((item) => {
-                    const Icon = item.icon;
-                    
-                    // Tentukan status aktif
-                    const isActive = item.href === '/admin/dashboard' ? isDashboardActive : pathname.startsWith(item.href);
+      <div className="pt-2 flex-1 flex flex-col px-3 py-4 space-y-2">
+        {navItems.map((item) => {
+          const Icon = item.icon;
+          
+          // Tentukan status aktif
+          const isActive = item.href === '/dosen/dashboard' ? isDashboardActive : pathname.startsWith(item.href);
 
-                    return (
-                        <Link 
-                            key={item.label}
-                            href={item.href}
-                            className={`flex items-center p-4 transition-colors text-lg font-medium 
-                                ${isActive 
-                                    ? 'bg-white border-r-4 border-white font-bold' // Status Aktif
-                                    : 'hover:bg-white' // Status Hover
-                                }
-                            `}
-                        >
-                            <Icon className="w-5 h-5" />
-                            <span>{item.label}</span>
-                        </Link>
-                    );
-                })}
-                
-                
-            </div>
-            
-            {/* About Us Placeholder */}
-            <Link href="https://www.polibatam.ac.id/" className="underline">
+          return (
+            <Link 
+              key={item.label}
+              href={item.href}
+              className={`flex items-center gap-3 px-4 py-3 rounded-md transition 
+                ${isActive 
+                  ? 'bg-white text-black font-medium'
+                    : 'hover:bg-blue-200 hover:text-black'
+                }
+              `}
+            >
+              <Icon className="w-5 h-5" />
+              <span>{item.label}</span>
+            </Link>
+          );
+        })}
+        
+        
+      </div>
+      
+      {/* About Us Placeholder */}
+      <Link href="https://www.polibatam.ac.id/" className="underline">
             About us
           </Link>
-        </aside>
-    );
+    </aside>
+  );
 };

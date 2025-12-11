@@ -4,16 +4,16 @@ import { FaPlus } from "react-icons/fa";
 
 export default function DashboardPage() {
   return (
-    <div className="min-h-screen bg-[#f5f8ff] p-8 ml-[250px] box-border">
+    <div className="min-h-screen bg-[#f5f8ff] py-8 px-26 box-border">
       {/* CARD SECTION */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-8">
-        <div className="bg-white shadow-md rounded-2xl p-6 border border-gray-200 hover:shadow-lg transition duration-200">
+        <div className="bg-white shadow-md rounded-2xl p-12 border border-gray-200 hover:shadow-lg transition duration-200 text-center">
           <h3 className="text-lg font-semibold text-[#1d4f91] mb-2">
             Total Mahasiswa Bimbingan
           </h3>
           <p className="text-4xl font-bold text-[#386bc0]">10</p>
         </div>
-        <div className="bg-white shadow-md rounded-2xl p-6 border border-gray-200 hover:shadow-lg transition duration-200">
+        <div className="bg-white shadow-md rounded-2xl p-12 border border-gray-200 hover:shadow-lg transition duration-200 text-center">
           <h3 className="text-lg font-semibold text-[#1d4f91] mb-2">
             Total Dosen Pembimbing
           </h3>

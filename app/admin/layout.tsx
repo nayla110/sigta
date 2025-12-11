@@ -35,10 +35,10 @@ export default function AdminLayout({
     <div className="flex flex-col min-h-screen">
       {/* === HEADER === */}
       <header
-        className={`flex justify-between items-center p-4 px-8 sticky top-0 z-20 ${headerBg} ${shadow} w-full`}
+        className={`flex justify-between items-center p-5 px-8 sticky top-0 z-20 ${headerBg} ${shadow} w-full`}
       >
         {/* Judul Halaman */}
-        <h1 className={`text-2xl font-semibold tracking-wide font-gentium ${titleColor}`}>
+        <h1 className={`text-2xl font-semibold tracking-wide font-gentium ${titleColor}` }>
   {title}
 </h1>
 

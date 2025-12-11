@@ -4,7 +4,7 @@ import { FaPlus } from "react-icons/fa";
 
 export default function DosenPage() {
   return (
-    <div className="min-h-screen bg-[#f5f8ff] p-10 ml-[250px] box-border">
+    <div className="min-h-screen bg-[#f5f8ff] py-8 px-26 box-border">
       {/* JUDUL */}
       <h1 className="bg-[#1d4f91] text-white text-center text-2xl font-bold py-4 rounded-t-2xl shadow-sm">
         Kelola Akun Dosen
