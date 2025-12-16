@@ -9,6 +9,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Import Routes
+const authRoutes = require('./routes/authRoutes');
 const adminRoutes = require('./routes/adminRoutes');
 const dosenRoutes = require('./routes/dosenRoutes');
 const mahasiswaRoutes = require('./routes/mahasiswaRoutes');
@@ -16,6 +17,7 @@ const beritaRoutes = require('./routes/beritaRoutes');
 const programStudiRoutes = require('./routes/programStudiRoutes');
 
 // Use Routes
+app.use('/api/auth', authRoutes); // ⭐ Auth routes untuk login
 app.use('/api/admin', adminRoutes);
 app.use('/api/dosen', dosenRoutes);
 app.use('/api/mahasiswa', mahasiswaRoutes);
@@ -26,6 +28,7 @@ app.get('/', (req, res) => {
   res.json({ 
     message: 'SIGTA API Server Running',
     endpoints: {
+      auth: '/api/auth',
       admin: '/api/admin',
       dosen: '/api/dosen',
       mahasiswa: '/api/mahasiswa',

@@ -68,11 +68,11 @@ async function apiFetch(
   }
 }
 
-// ============= ADMIN API =============
+// ============= AUTH API (NEW) =============
 
-export const adminAPI = {
-  // Login
-  login: async (username: string, password: string) => {
+export const authAPI = {
+  // Login Admin
+  loginAdmin: async (username: string, password: string) => {
     const data = await apiFetch('/admin/login', {
       method: 'POST',
       body: JSON.stringify({ username, password }),
@@ -89,6 +89,55 @@ export const adminAPI = {
     return data;
   },
 
+  // Login Mahasiswa (menggunakan NIM)
+  loginMahasiswa: async (nim: string, password: string) => {
+    const data = await apiFetch('/auth/mahasiswa/login', {
+      method: 'POST',
+      body: JSON.stringify({ nim, password }),
+    });
+    
+    if (data.success && data.data.token) {
+      setToken(data.data.token);
+      if (typeof window !== 'undefined') {
+        document.cookie = `token=${data.data.token}; path=/; max-age=${7 * 24 * 60 * 60}`;
+      }
+    }
+    
+    return data;
+  },
+
+  // Login Dosen (menggunakan NIK)
+  loginDosen: async (nik: string, password: string) => {
+    const data = await apiFetch('/auth/dosen/login', {
+      method: 'POST',
+      body: JSON.stringify({ nik, password }),
+    });
+    
+    if (data.success && data.data.token) {
+      setToken(data.data.token);
+      if (typeof window !== 'undefined') {
+        document.cookie = `token=${data.data.token}; path=/; max-age=${7 * 24 * 60 * 60}`;
+      }
+    }
+    
+    return data;
+  },
+
+  // Logout Universal
+  logout: async () => {
+    try {
+      await apiFetch('/auth/logout', { method: 'POST' });
+    } catch (error) {
+      console.error('Logout API error:', error);
+    } finally {
+      removeToken();
+    }
+  },
+};
+
+// ============= ADMIN API =============
+
+export const adminAPI = {
   // Logout
   logout: async () => {
     try {
