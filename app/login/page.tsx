@@ -2,15 +2,17 @@
 
 import { useState, FormEvent } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { adminAPI } from '@/lib/api';
+import { authAPI } from '@/lib/api';
+
+type UserRole = 'admin' | 'mahasiswa' | 'dosen';
 
 export default function LoginPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const redirectUrl = searchParams.get('redirect') || '/admin/dashboard';
   
+  const [role, setRole] = useState<UserRole>('admin');
   const [formData, setFormData] = useState({
-    username: '',
+    identifier: '', // username/nim/nik
     password: ''
   });
   const [isLoading, setIsLoading] = useState(false);
@@ -22,19 +24,55 @@ export default function LoginPage() {
     setIsLoading(true);
 
     try {
-      const response = await adminAPI.login(formData.username, formData.password);
-      
-      if (response.success) {
-        // Simpan token ke cookie juga untuk middleware
-        document.cookie = `token=${response.data.token}; path=/; max-age=${7 * 24 * 60 * 60}`; // 7 days
+      let response;
+      let redirectPath = '/';
+
+      // Login berdasarkan role
+      switch (role) {
+        case 'admin':
+          response = await authAPI.loginAdmin(formData.identifier, formData.password);
+          redirectPath = searchParams.get('redirect') || '/admin/dashboard';
+          break;
         
-        // Redirect ke halaman yang dituju atau dashboard
-        router.push(redirectUrl);
+        case 'mahasiswa':
+          response = await authAPI.loginMahasiswa(formData.identifier, formData.password);
+          redirectPath = '/mahasiswa/dashboard';
+          break;
+        
+        case 'dosen':
+          response = await authAPI.loginDosen(formData.identifier, formData.password);
+          redirectPath = '/dosen/dashboard';
+          break;
+      }
+
+      if (response.success) {
+        // Simpan token ke cookie
+        document.cookie = `token=${response.data.token}; path=/; max-age=${7 * 24 * 60 * 60}`;
+        
+        // Redirect ke halaman yang sesuai
+        router.push(redirectPath);
       }
     } catch (err: any) {
-      setError(err.message || 'Login gagal. Periksa username dan password Anda.');
+      setError(err.message || 'Login gagal. Periksa kredensial Anda.');
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  // Label dinamis berdasarkan role
+  const getIdentifierLabel = () => {
+    switch (role) {
+      case 'admin': return 'Username';
+      case 'mahasiswa': return 'NIM';
+      case 'dosen': return 'NIK';
+    }
+  };
+
+  const getIdentifierPlaceholder = () => {
+    switch (role) {
+      case 'admin': return 'Masukkan username';
+      case 'mahasiswa': return 'Masukkan NIM';
+      case 'dosen': return 'Masukkan NIK';
     }
   };
 
@@ -49,10 +87,49 @@ export default function LoginPage() {
       <div className="absolute inset-0 bg-black/50"></div>
 
       {/* Card login */}
-      <div className="relative z-10 bg-[#b8dcff]/90 w-[400px] rounded-[40px] flex flex-col items-center p-10 justify-center shadow-lg backdrop-blur-sm">
+      <div className="relative z-10 bg-[#b8dcff]/90 w-[450px] rounded-[40px] flex flex-col items-center p-10 justify-center shadow-lg backdrop-blur-sm">
         {/* Logo dan judul */}
-        <div className="flex items-center">
-          <img src="/logo.png" alt="SigTA Logo" className="w-35 h-35 mb-3" />
+        <div className="flex items-center mb-4">
+          <img src="/logo.png" alt="SigTA Logo" className="w-35 h-35" />
+        </div>
+
+        {/* Role Selector */}
+        <div className="w-full mb-6">
+          <div className="flex gap-2 bg-white/50 rounded-full p-1">
+            <button
+              type="button"
+              onClick={() => setRole('admin')}
+              className={`flex-1 py-2 px-4 rounded-full text-sm font-medium transition-all ${
+                role === 'admin' 
+                  ? 'bg-white text-blue-600 shadow-md' 
+                  : 'text-gray-600 hover:bg-white/30'
+              }`}
+            >
+              Admin
+            </button>
+            <button
+              type="button"
+              onClick={() => setRole('mahasiswa')}
+              className={`flex-1 py-2 px-4 rounded-full text-sm font-medium transition-all ${
+                role === 'mahasiswa' 
+                  ? 'bg-white text-blue-600 shadow-md' 
+                  : 'text-gray-600 hover:bg-white/30'
+              }`}
+            >
+              Mahasiswa
+            </button>
+            <button
+              type="button"
+              onClick={() => setRole('dosen')}
+              className={`flex-1 py-2 px-4 rounded-full text-sm font-medium transition-all ${
+                role === 'dosen' 
+                  ? 'bg-white text-blue-600 shadow-md' 
+                  : 'text-gray-600 hover:bg-white/30'
+              }`}
+            >
+              Dosen
+            </button>
+          </div>
         </div>
 
         {/* Error Message */}
@@ -63,14 +140,14 @@ export default function LoginPage() {
         )}
 
         {/* Form login */}
-        <form onSubmit={handleSubmit} className="flex flex-col space-y-5 w-full mt-5">
-          {/* Input Nama Pengguna */}
+        <form onSubmit={handleSubmit} className="flex flex-col space-y-5 w-full">
+          {/* Input Identifier (Username/NIM/NIK) */}
           <div className="bg-white rounded-full shadow-sm">
             <input
               type="text"
-              placeholder="Nama Pengguna"
-              value={formData.username}
-              onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+              placeholder={getIdentifierPlaceholder()}
+              value={formData.identifier}
+              onChange={(e) => setFormData({ ...formData, identifier: e.target.value })}
               required
               disabled={isLoading}
               className="w-full rounded-full py-3 px-5 text-gray-700 placeholder-gray-400 focus:outline-none bg-transparent disabled:opacity-50"
@@ -101,11 +178,13 @@ export default function LoginPage() {
         </form>
 
         {/* Info default login */}
-        <div className="mt-4 text-xs text-gray-600 text-center">
-          <p>Default Login:</p>
-          <p className="font-semibold">Username: admin</p>
-          <p className="font-semibold">Password: admin123</p>
-        </div>
+        {role === 'admin' && (
+          <div className="mt-4 text-xs text-gray-600 text-center">
+            <p>Default Login Admin:</p>
+            <p className="font-semibold">Username: admin</p>
+            <p className="font-semibold">Password: admin123</p>
+          </div>
+        )}
       </div>
     </div>
   );
