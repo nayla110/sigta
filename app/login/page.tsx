@@ -1,11 +1,14 @@
 "use client";
 
 import { useState, FormEvent } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { adminAPI } from '@/lib/api';
 
 export default function LoginPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirectUrl = searchParams.get('redirect') || '/admin/dashboard';
+  
   const [formData, setFormData] = useState({
     username: '',
     password: ''
@@ -22,8 +25,11 @@ export default function LoginPage() {
       const response = await adminAPI.login(formData.username, formData.password);
       
       if (response.success) {
-        // Redirect ke dashboard admin
-        router.push('/admin/dashboard');
+        // Simpan token ke cookie juga untuk middleware
+        document.cookie = `token=${response.data.token}; path=/; max-age=${7 * 24 * 60 * 60}`; // 7 days
+        
+        // Redirect ke halaman yang dituju atau dashboard
+        router.push(redirectUrl);
       }
     } catch (err: any) {
       setError(err.message || 'Login gagal. Periksa username dan password Anda.');
@@ -66,7 +72,8 @@ export default function LoginPage() {
               value={formData.username}
               onChange={(e) => setFormData({ ...formData, username: e.target.value })}
               required
-              className="w-full rounded-full py-3 px-5 text-gray-700 placeholder-gray-400 focus:outline-none bg-transparent"
+              disabled={isLoading}
+              className="w-full rounded-full py-3 px-5 text-gray-700 placeholder-gray-400 focus:outline-none bg-transparent disabled:opacity-50"
             />
           </div>
 
@@ -78,7 +85,8 @@ export default function LoginPage() {
               value={formData.password}
               onChange={(e) => setFormData({ ...formData, password: e.target.value })}
               required
-              className="w-full rounded-full py-3 px-5 text-gray-700 placeholder-gray-400 focus:outline-none bg-transparent"
+              disabled={isLoading}
+              className="w-full rounded-full py-3 px-5 text-gray-700 placeholder-gray-400 focus:outline-none bg-transparent disabled:opacity-50"
             />
           </div>
 
@@ -92,9 +100,11 @@ export default function LoginPage() {
           </button>
         </form>
 
-        {/* Info default login (hanya untuk development) */}
+        {/* Info default login */}
         <div className="mt-4 text-xs text-gray-600 text-center">
-          <p>Default: admin / admin123</p>
+          <p>Default Login:</p>
+          <p className="font-semibold">Username: admin</p>
+          <p className="font-semibold">Password: admin123</p>
         </div>
       </div>
     </div>

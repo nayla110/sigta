@@ -20,6 +20,8 @@ export const setToken = (token: string): void => {
 export const removeToken = (): void => {
   if (typeof window !== 'undefined') {
     localStorage.removeItem('token');
+    // Hapus cookie juga
+    document.cookie = 'token=; path=/; max-age=0';
   }
 };
 
@@ -78,6 +80,10 @@ export const adminAPI = {
     
     if (data.success && data.data.token) {
       setToken(data.data.token);
+      // Simpan ke cookie juga untuk middleware
+      if (typeof window !== 'undefined') {
+        document.cookie = `token=${data.data.token}; path=/; max-age=${7 * 24 * 60 * 60}`;
+      }
     }
     
     return data;
@@ -85,8 +91,14 @@ export const adminAPI = {
 
   // Logout
   logout: async () => {
-    await apiFetch('/admin/logout', { method: 'POST' });
-    removeToken();
+    try {
+      await apiFetch('/admin/logout', { method: 'POST' });
+    } catch (error) {
+      console.error('Logout API error:', error);
+    } finally {
+      // Selalu hapus token meskipun API error
+      removeToken();
+    }
   },
 
   // Get Dashboard Stats

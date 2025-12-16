@@ -32,8 +32,14 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   }, []);
 
   const handleLogout = () => {
-    alert('Anda telah keluar dari sistem.');
-    router.push('/login');
+    if (confirm('Apakah Anda yakin ingin keluar?')) {
+      // Hapus token dari localStorage dan cookie
+      localStorage.removeItem('token');
+      document.cookie = 'token=; path=/; max-age=0';
+      
+      // Redirect ke login
+      router.push('/login');
+    }
   };
 
   const isDashboard = pathname === '/mahasiswa/dashboard';
@@ -49,60 +55,62 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     <div className="min-h-screen bg-gray-50">
       {/* === Navbar FULL-WIDTH (fixed) === */}
       <header
-  className="fixed top-0 left-0 right-0 z-30 shadow-md flex items-center text-white"
-  style={{
-    height: NAVBAR_HEIGHT,
-    backgroundColor: NAVBAR_COLOR,
-  }}
->
-  {/* === JUDUL DI POJOK KIRI === */}
-  <div className="text-2xl font-semibold tracking-wide font-gentium px-6">
-    {getTitle()}
-  </div>
+        className="fixed top-0 left-0 right-0 z-30 shadow-md flex items-center text-white"
+        style={{
+          height: NAVBAR_HEIGHT,
+          backgroundColor: NAVBAR_COLOR,
+        }}
+      >
+        {/* === JUDUL DI POJOK KIRI === */}
+        <div className="text-2xl font-semibold tracking-wide font-gentium px-6">
+          {getTitle()}
+        </div>
 
-  {/* === SPACER agar ikon tetap di kanan === */}
-  <div className="flex-1"></div>
+        {/* === SPACER agar ikon tetap di kanan === */}
+        <div className="flex-1"></div>
 
-  {/* === IKON DI KANAN === */}
-  {isDashboard && (
-    <div className="flex items-center gap-6 pr-8">
-      <button className="relative p-2 rounded-full transition hover:opacity-90">
-        <Bell className="w-8 h-8" color="#FDE047" />
-        <span className="absolute top-0 right-0 block h-3 w-3 rounded-full ring-2 ring-white bg-red-600"></span>
-      </button>
-
-      <div className="relative" ref={dropdownRef}>
-        <button
-          onClick={() => setOpenDropdown(!openDropdown)}
-          className="flex items-center gap-2 p-1 rounded-full hover:opacity-90 transition"
-        >
-          <User className="w-8 h-8" />
-        </button>
-
-        {openDropdown && (
-          <div className="absolute right-0 mt-3 w-44 bg-white text-gray-800 border rounded-lg shadow-md overflow-hidden z-50">
-            <Link href="/mahasiswa/profil" className="block px-4 py-2 text-sm hover:bg-gray-100">
-              Profil
-            </Link>
-            <Link href="/mahasiswa/setting" className="block px-4 py-2 text-sm hover:bg-gray-100">
-              Pengaturan
-            </Link>
-            <button className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100 border-t" onClick={handleLogout}>
-              Keluar
+        {/* === IKON DI KANAN === */}
+        {isDashboard && (
+          <div className="flex items-center gap-6 pr-8">
+            <button className="relative p-2 rounded-full transition hover:opacity-90">
+              <Bell className="w-8 h-8" color="#FDE047" />
+              <span className="absolute top-0 right-0 block h-3 w-3 rounded-full ring-2 ring-white bg-red-600"></span>
             </button>
+
+            <div className="relative" ref={dropdownRef}>
+              <button
+                onClick={() => setOpenDropdown(!openDropdown)}
+                className="flex items-center gap-2 p-1 rounded-full hover:opacity-90 transition"
+              >
+                <User className="w-8 h-8" />
+              </button>
+
+              {openDropdown && (
+                <div className="absolute right-0 mt-3 w-44 bg-white text-gray-800 border rounded-lg shadow-md overflow-hidden z-50">
+                  <Link href="/mahasiswa/profil" className="block px-4 py-2 text-sm hover:bg-gray-100">
+                    Profil
+                  </Link>
+                  <Link href="/mahasiswa/setting" className="block px-4 py-2 text-sm hover:bg-gray-100">
+                    Pengaturan
+                  </Link>
+                  <button 
+                    className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100 border-t" 
+                    onClick={handleLogout}
+                  >
+                    Keluar
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         )}
-      </div>
-    </div>
-  )}
-</header>
-
+      </header>
 
       {/* === Sidebar (di bawah navbar) === */}
       <aside
         className="fixed left-0 text-black flex flex-col shadow-lg"
         style={{
-          top: NAVBAR_HEIGHT,                    // mulai setelah navbar
+          top: NAVBAR_HEIGHT,
           width: SIDEBAR_WIDTH,
           height: `calc(100vh - ${NAVBAR_HEIGHT}px)`,
           backgroundColor: SIDEBAR_COLOR
@@ -169,8 +177,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 <span>Tugas Akhir</span>
               </Link>
             </li>
-
-          
           </ul>
         </nav>
 
@@ -188,7 +194,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       <main
         className="bg-gray-50 min-h-screen"
         style={{
-          paddingTop: NAVBAR_HEIGHT + 32,          // spasi di bawah navbar (64 + 32px padding)
+          paddingTop: NAVBAR_HEIGHT + 32,
           marginLeft: SIDEBAR_WIDTH,
           paddingLeft: 32,
           paddingRight: 32,

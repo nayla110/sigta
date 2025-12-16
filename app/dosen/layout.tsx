@@ -44,13 +44,18 @@ export default function DosenLayout({ children }: { children: React.ReactNode })
     };
   }, []);
 
-  // Logout + notifikasi
+  // Logout function
   const logout = () => {
-    setOpenUser(false);
-    alert('Anda telah keluar dari sistem.');
-    router.push('/login');
-    // Jika ingin versi konfirmasi:
-    // if (window.confirm('Anda telah keluar dari sistem.')) router.push('/login');
+    if (confirm('Apakah Anda yakin ingin keluar?')) {
+      setOpenUser(false);
+      
+      // Hapus token dari localStorage dan cookie
+      localStorage.removeItem('token');
+      document.cookie = 'token=; path=/; max-age=0';
+      
+      // Redirect ke login
+      router.push('/login');
+    }
   };
 
   return (
