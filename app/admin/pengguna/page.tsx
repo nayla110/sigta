@@ -1,11 +1,76 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { FaChevronDown } from "react-icons/fa";
+import { mahasiswaAPI, dosenAPI } from "@/lib/api";
+
+interface Mahasiswa {
+  id: string;
+  nim: string;
+  nama: string;
+  program_studi_nama: string;
+  judul_ta: string;
+  dosen_pembimbing_nama: string;
+}
+
+interface Dosen {
+  id: string;
+  nik: string;
+  nama: string;
+  program_studi_nama: string;
+}
 
 export default function DaftarPengguna() {
   const [showMahasiswa, setShowMahasiswa] = useState(true);
   const [showDosen, setShowDosen] = useState(true);
+  const [mahasiswaList, setMahasiswaList] = useState<Mahasiswa[]>([]);
+  const [dosenList, setDosenList] = useState<Dosen[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [mahasiswaCounts, setMahasiswaCounts] = useState<Record<string, number>>({});
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const fetchData = async () => {
+    try {
+      setIsLoading(true);
+      
+      const [mahasiswaRes, dosenRes] = await Promise.all([
+        mahasiswaAPI.getAll(),
+        dosenAPI.getAll()
+      ]);
+
+      if (mahasiswaRes.success) {
+        setMahasiswaList(mahasiswaRes.data);
+        
+        // Hitung jumlah mahasiswa per dosen
+        const counts: Record<string, number> = {};
+        mahasiswaRes.data.forEach((mhs: any) => {
+          if (mhs.dosen_pembimbing_id) {
+            counts[mhs.dosen_pembimbing_id] = (counts[mhs.dosen_pembimbing_id] || 0) + 1;
+          }
+        });
+        setMahasiswaCounts(counts);
+      }
+      
+      if (dosenRes.success) {
+        setDosenList(dosenRes.data);
+      }
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white p-6 md:p-10 flex items-center justify-center">
+        <div className="text-xl text-gray-600">Memuat data...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white p-6 md:p-10">
@@ -28,7 +93,7 @@ export default function DaftarPengguna() {
                 showMahasiswa ? "rotate-180" : ""
               }`}
             />
-            Mahasiswa
+            Mahasiswa ({mahasiswaList.length})
           </button>
 
           {showMahasiswa && (
@@ -44,14 +109,34 @@ export default function DaftarPengguna() {
                   </tr>
                 </thead>
                 <tbody>
-                  <tr>
-                    <td
-                      colSpan={5}
-                      className="text-center py-6 text-gray-500 italic"
-                    >
-                      Belum ada data mahasiswa
-                    </td>
-                  </tr>
+                  {mahasiswaList.length === 0 ? (
+                    <tr>
+                      <td
+                        colSpan={5}
+                        className="text-center py-6 text-gray-500 italic"
+                      >
+                        Belum ada data mahasiswa
+                      </td>
+                    </tr>
+                  ) : (
+                    mahasiswaList.map((mahasiswa, index) => (
+                      <tr key={mahasiswa.id} className="hover:bg-gray-50">
+                        <td className="py-3 px-4 border-b">{index + 1}</td>
+                        <td className="py-3 px-4 border-b">
+                          {mahasiswa.nama} ({mahasiswa.nim})
+                        </td>
+                        <td className="py-3 px-4 border-b">
+                          {mahasiswa.program_studi_nama}
+                        </td>
+                        <td className="py-3 px-4 border-b">
+                          {mahasiswa.judul_ta || '-'}
+                        </td>
+                        <td className="py-3 px-4 border-b">
+                          {mahasiswa.dosen_pembimbing_nama || '-'}
+                        </td>
+                      </tr>
+                    ))
+                  )}
                 </tbody>
               </table>
             </div>
@@ -69,7 +154,7 @@ export default function DaftarPengguna() {
                 showDosen ? "rotate-180" : ""
               }`}
             />
-            Dosen
+            Dosen ({dosenList.length})
           </button>
 
           {showDosen && (
@@ -86,14 +171,31 @@ export default function DaftarPengguna() {
                   </tr>
                 </thead>
                 <tbody>
-                  <tr>
-                    <td
-                      colSpan={4}
-                      className="text-center py-6 text-gray-500 italic"
-                    >
-                      Belum ada data dosen
-                    </td>
-                  </tr>
+                  {dosenList.length === 0 ? (
+                    <tr>
+                      <td
+                        colSpan={4}
+                        className="text-center py-6 text-gray-500 italic"
+                      >
+                        Belum ada data dosen
+                      </td>
+                    </tr>
+                  ) : (
+                    dosenList.map((dosen, index) => (
+                      <tr key={dosen.id} className="hover:bg-gray-50">
+                        <td className="py-3 px-4 border-b">{index + 1}</td>
+                        <td className="py-3 px-4 border-b">
+                          {dosen.nama} ({dosen.nik})
+                        </td>
+                        <td className="py-3 px-4 border-b">
+                          {dosen.program_studi_nama}
+                        </td>
+                        <td className="py-3 px-4 border-b">
+                          {mahasiswaCounts[dosen.id] || 0} mahasiswa
+                        </td>
+                      </tr>
+                    ))
+                  )}
                 </tbody>
               </table>
             </div>
