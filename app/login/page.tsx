@@ -178,13 +178,7 @@ export default function LoginPage() {
         </form>
 
         {/* Info default login */}
-        {role === 'admin' && (
-          <div className="mt-4 text-xs text-gray-600 text-center">
-            <p>Default Login Admin:</p>
-            <p className="font-semibold">Username: admin</p>
-            <p className="font-semibold">Password: admin123</p>
-          </div>
-        )}
+        
       </div>
     </div>
   );
