@@ -6,6 +6,14 @@ const { authenticate } = require('../middleware/auth');
 // Semua routes butuh authentication
 router.use(authenticate);
 
+// === ROUTES UNTUK DOSEN YANG LOGIN ===
+// Get current dosen profile
+router.get('/profile', dosenController.getCurrentProfile);
+
+// Get mahasiswa bimbingan
+router.get('/mahasiswa-bimbingan', dosenController.getMahasiswaBimbingan);
+
+// === ROUTES UNTUK ADMIN (CRUD DOSEN) ===
 // Get all dosen
 router.get('/', dosenController.getAllDosen);
 

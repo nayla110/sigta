@@ -219,3 +219,74 @@ exports.deleteDosen = async (req, res) => {
     });
   }
 };
+
+// Tambahkan di akhir file dosenController.js
+
+// Get Current Dosen Profile (yang sedang login)
+exports.getCurrentProfile = async (req, res) => {
+  try {
+    const dosenId = req.user.id; // Dari middleware auth
+
+    const [dosen] = await db.query(`
+      SELECT d.id, d.nik, d.nama, d.email, d.no_telp, 
+             p.nama as program_studi_nama, p.jenjang as program_studi_jenjang
+      FROM dosen d
+      LEFT JOIN program_studi p ON d.program_studi_id = p.id
+      WHERE d.id = ?
+    `, [dosenId]);
+
+    if (dosen.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: 'Profil dosen tidak ditemukan'
+      });
+    }
+
+    // Hitung jumlah mahasiswa bimbingan
+    const [mahasiswaCount] = await db.query(
+      'SELECT COUNT(*) as total FROM mahasiswa WHERE dosen_pembimbing_id = ?',
+      [dosenId]
+    );
+
+    res.json({
+      success: true,
+      data: {
+        ...dosen[0],
+        total_mahasiswa_bimbingan: mahasiswaCount[0].total
+      }
+    });
+  } catch (error) {
+    console.error('Error getting dosen profile:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Gagal mengambil profil dosen'
+    });
+  }
+};
+
+// Get Mahasiswa Bimbingan
+exports.getMahasiswaBimbingan = async (req, res) => {
+  try {
+    const dosenId = req.user.id;
+
+    const [mahasiswa] = await db.query(`
+      SELECT m.id, m.nim, m.nama, m.email, m.no_telp, m.judul_ta,
+             p.nama as program_studi_nama, p.kode as program_studi_kode
+      FROM mahasiswa m
+      LEFT JOIN program_studi p ON m.program_studi_id = p.id
+      WHERE m.dosen_pembimbing_id = ?
+      ORDER BY m.nama ASC
+    `, [dosenId]);
+
+    res.json({
+      success: true,
+      data: mahasiswa
+    });
+  } catch (error) {
+    console.error('Error getting mahasiswa bimbingan:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Gagal mengambil data mahasiswa bimbingan'
+    });
+  }
+};

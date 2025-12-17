@@ -163,18 +163,20 @@ export const adminAPI = {
 
 // ============= DOSEN API =============
 
+// Tambahkan di bagian DOSEN API
+
 export const dosenAPI = {
-  // Get all dosen
+  // Get all dosen (untuk admin)
   getAll: async () => {
     return apiFetch('/dosen');
   },
 
-  // Get dosen by ID
+  // Get dosen by ID (untuk admin)
   getById: async (id: string) => {
     return apiFetch(`/dosen/${id}`);
   },
 
-  // Create dosen
+  // Create dosen (untuk admin)
   create: async (dosenData: any) => {
     return apiFetch('/dosen', {
       method: 'POST',
@@ -182,7 +184,7 @@ export const dosenAPI = {
     });
   },
 
-  // Update dosen
+  // Update dosen (untuk admin)
   update: async (id: string, dosenData: any) => {
     return apiFetch(`/dosen/${id}`, {
       method: 'PUT',
@@ -190,13 +192,34 @@ export const dosenAPI = {
     });
   },
 
-  // Delete dosen
+  // Delete dosen (untuk admin)
   delete: async (id: string) => {
     return apiFetch(`/dosen/${id}`, {
       method: 'DELETE',
     });
   },
+
+  // === UNTUK DOSEN YANG LOGIN ===
+  // Get current profile
+  getCurrentProfile: async () => {
+    return apiFetch('/dosen/profile');
+  },
+
+  // Get mahasiswa bimbingan
+  getMahasiswaBimbingan: async () => {
+    return apiFetch('/dosen/mahasiswa-bimbingan');
+  },
+
+  // Update own profile
+  updateProfile: async (profileData: any) => {
+    return apiFetch('/dosen/profile', {
+      method: 'PUT',
+      body: JSON.stringify(profileData),
+    });
+  },
 };
+
+
 
 // ============= MAHASISWA API =============
 
