@@ -15,14 +15,16 @@ const dosenRoutes = require('./routes/dosenRoutes');
 const mahasiswaRoutes = require('./routes/mahasiswaRoutes');
 const beritaRoutes = require('./routes/beritaRoutes');
 const programStudiRoutes = require('./routes/programStudiRoutes');
+const bimbinganRoutes = require('./routes/bimbinganRoutes'); // ⭐ TAMBAHKAN INI
 
 // Use Routes
-app.use('/api/auth', authRoutes); // ⭐ Auth routes untuk login
+app.use('/api/auth', authRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/dosen', dosenRoutes);
 app.use('/api/mahasiswa', mahasiswaRoutes);
 app.use('/api/berita', beritaRoutes);
 app.use('/api/program-studi', programStudiRoutes);
+app.use('/api/bimbingan', bimbinganRoutes); // ⭐ TAMBAHKAN INI
 
 app.get('/', (req, res) => {
   res.json({ 
@@ -33,7 +35,8 @@ app.get('/', (req, res) => {
       dosen: '/api/dosen',
       mahasiswa: '/api/mahasiswa',
       berita: '/api/berita',
-      programStudi: '/api/program-studi'
+      programStudi: '/api/program-studi',
+      bimbingan: '/api/bimbingan' // ⭐ TAMBAHKAN INI
     }
   });
 });

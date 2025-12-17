@@ -224,17 +224,17 @@ export const dosenAPI = {
 // ============= MAHASISWA API =============
 
 export const mahasiswaAPI = {
-  // Get all mahasiswa
+  // Get all mahasiswa (untuk admin)
   getAll: async () => {
     return apiFetch('/mahasiswa');
   },
 
-  // Get mahasiswa by ID
+  // Get mahasiswa by ID (untuk admin)
   getById: async (id: string) => {
     return apiFetch(`/mahasiswa/${id}`);
   },
 
-  // Create mahasiswa
+  // Create mahasiswa (untuk admin)
   create: async (mahasiswaData: any) => {
     return apiFetch('/mahasiswa', {
       method: 'POST',
@@ -242,7 +242,7 @@ export const mahasiswaAPI = {
     });
   },
 
-  // Update mahasiswa
+  // Update mahasiswa (untuk admin)
   update: async (id: string, mahasiswaData: any) => {
     return apiFetch(`/mahasiswa/${id}`, {
       method: 'PUT',
@@ -250,11 +250,30 @@ export const mahasiswaAPI = {
     });
   },
 
-  // Delete mahasiswa
+  // Delete mahasiswa (untuk admin)
   delete: async (id: string) => {
     return apiFetch(`/mahasiswa/${id}`, {
       method: 'DELETE',
     });
+  },
+
+  // === UNTUK MAHASISWA YANG LOGIN ===
+  // Get current profile
+  getCurrentProfile: async () => {
+    return apiFetch('/mahasiswa/profile');
+  },
+
+  // Update own profile
+  updateProfile: async (profileData: any) => {
+    return apiFetch('/mahasiswa/profile', {
+      method: 'PUT',
+      body: JSON.stringify(profileData),
+    });
+  },
+
+  // Get dashboard data
+  getDashboardData: async () => {
+    return apiFetch('/mahasiswa/dashboard');
   },
 };
 
@@ -306,5 +325,55 @@ export const programStudiAPI = {
   // Get all program studi
   getAll: async () => {
     return apiFetch('/program-studi');
+  },
+};
+
+// ============= BIMBINGAN API =============
+
+export const bimbinganAPI = {
+  // === MAHASISWA ===
+  // Create pengajuan bimbingan
+  createPengajuan: async (pengajuanData: any) => {
+    return apiFetch('/bimbingan/mahasiswa/pengajuan', {
+      method: 'POST',
+      body: JSON.stringify(pengajuanData),
+    });
+  },
+
+  // Get bimbingan list mahasiswa
+  getMahasiswaBimbingan: async () => {
+    return apiFetch('/bimbingan/mahasiswa/list');
+  },
+
+  // === DOSEN ===
+  // Get pengajuan bimbingan (optional filter by status)
+  getDosenPengajuan: async (status?: string) => {
+    const url = status 
+      ? `/bimbingan/dosen/pengajuan?status=${status}`
+      : '/bimbingan/dosen/pengajuan';
+    return apiFetch(url);
+  },
+
+  // Update status pengajuan (Terima/Tolak)
+  updateStatusPengajuan: async (id: string, status: 'Disetujui' | 'Ditolak', catatan?: string) => {
+    return apiFetch(`/bimbingan/dosen/pengajuan/${id}/status`, {
+      method: 'PUT',
+      body: JSON.stringify({ status, catatan }),
+    });
+  },
+
+  // Update catatan bimbingan
+  updateCatatan: async (id: string, catatan: string) => {
+    return apiFetch(`/bimbingan/dosen/pengajuan/${id}/catatan`, {
+      method: 'PUT',
+      body: JSON.stringify({ catatan }),
+    });
+  },
+
+  // Tandai selesai
+  tandaiSelesai: async (id: string) => {
+    return apiFetch(`/bimbingan/dosen/pengajuan/${id}/selesai`, {
+      method: 'PUT',
+    });
   },
 };

@@ -230,3 +230,145 @@ exports.deleteMahasiswa = async (req, res) => {
     });
   }
 };
+
+// Tambahkan di akhir file mahasiswaController.js
+
+// Get Current Mahasiswa Profile (yang sedang login)
+exports.getCurrentProfile = async (req, res) => {
+  try {
+    const mahasiswaId = req.user.id; // Dari middleware auth
+
+    const [mahasiswa] = await db.query(`
+      SELECT m.id, m.nim, m.nama, m.email, m.no_telp, m.judul_ta,
+             p.nama as program_studi_nama, p.kode as program_studi_kode, p.jenjang as program_studi_jenjang,
+             d.nama as dosen_pembimbing_nama, d.nik as dosen_pembimbing_nik, 
+             d.email as dosen_pembimbing_email, d.no_telp as dosen_pembimbing_telp
+      FROM mahasiswa m
+      LEFT JOIN program_studi p ON m.program_studi_id = p.id
+      LEFT JOIN dosen d ON m.dosen_pembimbing_id = d.id
+      WHERE m.id = ?
+    `, [mahasiswaId]);
+
+    if (mahasiswa.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: 'Profil mahasiswa tidak ditemukan'
+      });
+    }
+
+    res.json({
+      success: true,
+      data: mahasiswa[0]
+    });
+  } catch (error) {
+    console.error('Error getting mahasiswa profile:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Gagal mengambil profil mahasiswa'
+    });
+  }
+};
+
+// Update Own Profile
+exports.updateOwnProfile = async (req, res) => {
+  try {
+    const mahasiswaId = req.user.id;
+    const { nama, email, no_telp, judul_ta } = req.body;
+
+    // Cek apakah mahasiswa ada
+    const [existing] = await db.query(
+      'SELECT * FROM mahasiswa WHERE id = ?',
+      [mahasiswaId]
+    );
+
+    if (existing.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: 'Mahasiswa tidak ditemukan'
+      });
+    }
+
+    // Cek apakah email sudah digunakan oleh mahasiswa lain
+    if (email !== existing[0].email) {
+      const [duplicate] = await db.query(
+        'SELECT * FROM mahasiswa WHERE email = ? AND id != ?',
+        [email, mahasiswaId]
+      );
+
+      if (duplicate.length > 0) {
+        return res.status(400).json({
+          success: false,
+          message: 'Email sudah digunakan oleh mahasiswa lain'
+        });
+      }
+    }
+
+    // Update profile
+    await db.query(
+      `UPDATE mahasiswa 
+       SET nama = ?, email = ?, no_telp = ?, judul_ta = ?, updated_at = NOW()
+       WHERE id = ?`,
+      [nama, email, no_telp, judul_ta, mahasiswaId]
+    );
+
+    res.json({
+      success: true,
+      message: 'Profil berhasil diupdate'
+    });
+  } catch (error) {
+    console.error('Error updating mahasiswa profile:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Gagal mengupdate profil'
+    });
+  }
+};
+
+// Get Dashboard Data (untuk mahasiswa yang login)
+exports.getDashboardData = async (req, res) => {
+  try {
+    const mahasiswaId = req.user.id;
+
+    // Get mahasiswa info dengan dosen pembimbing
+    const [mahasiswa] = await db.query(`
+      SELECT m.id, m.nim, m.nama, m.judul_ta,
+             d.nama as dosen_nama, d.nik as dosen_nik, d.email as dosen_email, 
+             d.no_telp as dosen_telp,
+             p.nama as program_studi_nama
+      FROM mahasiswa m
+      LEFT JOIN dosen d ON m.dosen_pembimbing_id = d.id
+      LEFT JOIN program_studi p ON m.program_studi_id = p.id
+      WHERE m.id = ?
+    `, [mahasiswaId]);
+
+    if (mahasiswa.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: 'Data mahasiswa tidak ditemukan'
+      });
+    }
+
+    // Get jadwal bimbingan mendatang
+    const [jadwalBimbingan] = await db.query(`
+      SELECT id, tanggal, topik, status, catatan
+      FROM bimbingan
+      WHERE mahasiswa_id = ? AND tanggal >= NOW()
+      ORDER BY tanggal ASC
+      LIMIT 5
+    `, [mahasiswaId]);
+
+    res.json({
+      success: true,
+      data: {
+        mahasiswa: mahasiswa[0],
+        jadwal_bimbingan: jadwalBimbingan
+      }
+    });
+  } catch (error) {
+    console.error('Error getting dashboard data:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Gagal mengambil data dashboard'
+    });
+  }
+};
