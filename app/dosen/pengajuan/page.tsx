@@ -136,4 +136,91 @@ export default function PengajuanBimbinganPage() {
                 <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
                   Program Studi
                 </th>
-                <th className="px-6 py-3 text-
+                <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
+                  Topik
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
+                  Tanggal & Waktu
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
+                  Status
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
+                  Catatan
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
+                  Aksi
+                </th>
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {pengajuanList.length === 0 ? (
+                <tr>
+                  <td colSpan={7} className="px-6 py-8 text-center text-gray-500 italic">
+                    Tidak ada pengajuan bimbingan
+                  </td>
+                </tr>
+              ) : (
+                pengajuanList.map((pengajuan) => (
+                  <tr key={pengajuan.id} className="hover:bg-gray-50">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-800">
+                      {pengajuan.mahasiswa_nama}
+                      <br />
+                      <span className="text-xs text-gray-500">({pengajuan.nim})</span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-800">
+                      {pengajuan.program_studi_kode} - {pengajuan.program_studi_nama}
+                    </td>
+                    <td className="px-6 py-4 text-sm text-gray-800">
+                      {pengajuan.topik}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-800">
+                      {formatTanggal(pengajuan.tanggal)}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm">
+                      <span className={`px-3 py-1 rounded-full font-medium ${getStatusColor(pengajuan.status)}`}>
+                        {pengajuan.status}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 text-sm text-gray-600">
+                      {pengajuan.catatan || '-'}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                      {pengajuan.status === 'Menunggu' && (
+                        <div className="flex space-x-2">
+                          <button
+                            onClick={() => handleAccept(pengajuan.id)}
+                            className="text-green-600 hover:text-green-900 transition-colors"
+                            title="Terima Pengajuan"
+                          >
+                            <CheckCircle className="w-6 h-6" />
+                          </button>
+                          <button
+                            onClick={() => handleReject(pengajuan.id)}
+                            className="text-red-600 hover:text-red-900 transition-colors"
+                            title="Tolak Pengajuan"
+                          >
+                            <XCircle className="w-6 h-6" />
+                          </button>
+                        </div>
+                      )}
+                      {pengajuan.status === 'Disetujui' && (
+                        <span className="text-green-600 text-sm">✓ Disetujui</span>
+                      )}
+                      {pengajuan.status === 'Ditolak' && (
+                        <span className="text-red-600 text-sm">✗ Ditolak</span>
+                      )}
+                      {pengajuan.status === 'Selesai' && (
+                        <span className="text-blue-600 text-sm">✓ Selesai</span>
+                      )}
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  );
+}

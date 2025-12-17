@@ -17,6 +17,9 @@ router.get('/mahasiswa/list', bimbinganController.getMahasiswaBimbingan);
 // Get pengajuan bimbingan (bisa filter by status)
 router.get('/dosen/pengajuan', bimbinganController.getDosenPengajuan);
 
+// Get jadwal untuk kalender (⭐ TAMBAHKAN INI)
+router.get('/dosen/jadwal-kalender', bimbinganController.getDosenJadwalKalender);
+
 // Update status pengajuan (Terima/Tolak)
 router.put('/dosen/pengajuan/:id/status', bimbinganController.updateStatusPengajuan);
 

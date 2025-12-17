@@ -261,3 +261,46 @@ exports.tandaiSelesai = async (req, res) => {
     });
   }
 };
+
+// Tambahkan di akhir file bimbinganController.js
+
+// Get Jadwal Bimbingan untuk Kalender (Dosen)
+exports.getDosenJadwalKalender = async (req, res) => {
+  try {
+    const dosenId = req.user.id;
+    const { month, year } = req.query;
+
+    let query = `
+      SELECT b.id, b.tanggal, b.topik, b.status, b.catatan,
+             m.nim, m.nama as mahasiswa_nama,
+             p.nama as program_studi_nama
+      FROM bimbingan b
+      LEFT JOIN mahasiswa m ON b.mahasiswa_id = m.id
+      LEFT JOIN program_studi p ON m.program_studi_id = p.id
+      WHERE b.dosen_id = ? AND b.status = 'Disetujui'
+    `;
+
+    const params = [dosenId];
+
+    // Filter by month and year if provided
+    if (month && year) {
+      query += ` AND MONTH(b.tanggal) = ? AND YEAR(b.tanggal) = ?`;
+      params.push(month, year);
+    }
+
+    query += ` ORDER BY b.tanggal ASC`;
+
+    const [jadwal] = await db.query(query, params);
+
+    res.json({
+      success: true,
+      data: jadwal
+    });
+  } catch (error) {
+    console.error('Error getting jadwal kalender:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Gagal mengambil jadwal kalender'
+    });
+  }
+};

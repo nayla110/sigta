@@ -354,6 +354,15 @@ export const bimbinganAPI = {
     return apiFetch(url);
   },
 
+  // Get jadwal kalender (⭐ TAMBAHKAN INI)
+  getDosenJadwalKalender: async (month?: number, year?: number) => {
+    let url = '/bimbingan/dosen/jadwal-kalender';
+    if (month && year) {
+      url += `?month=${month}&year=${year}`;
+    }
+    return apiFetch(url);
+  },
+
   // Update status pengajuan (Terima/Tolak)
   updateStatusPengajuan: async (id: string, status: 'Disetujui' | 'Ditolak', catatan?: string) => {
     return apiFetch(`/bimbingan/dosen/pengajuan/${id}/status`, {
