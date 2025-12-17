@@ -386,3 +386,58 @@ export const bimbinganAPI = {
     });
   },
 };
+
+// ============= DOKUMEN API =============
+
+export const dokumenAPI = {
+  // === DOSEN ===
+  // Get mahasiswa bimbingan dengan detail
+  getMahasiswaBimbingan: async () => {
+    return apiFetch('/dokumen/dosen/mahasiswa');
+  },
+
+  // Get progress mahasiswa (status dan bab)
+  getProgressMahasiswa: async (mahasiswaId: string) => {
+    return apiFetch(`/dokumen/dosen/mahasiswa/${mahasiswaId}/progress`);
+  },
+
+  // Get riwayat dokumen mahasiswa
+  getRiwayatDokumen: async (mahasiswaId: string) => {
+    return apiFetch(`/dokumen/dosen/mahasiswa/${mahasiswaId}/riwayat`);
+  },
+
+  // Review dokumen (approve/reject)
+  reviewDokumen: async (dokumenId: string, status: 'Disetujui' | 'Ditolak', catatan?: string) => {
+    return apiFetch(`/dokumen/dosen/dokumen/${dokumenId}/review`, {
+      method: 'PUT',
+      body: JSON.stringify({ status, catatan }),
+    });
+  },
+
+  // Update status mahasiswa (untuk edit progress)
+  updateMahasiswaStatus: async (mahasiswaId: string, status: string, current_bab: number) => {
+    return apiFetch(`/dokumen/dosen/mahasiswa/${mahasiswaId}/status`, {
+      method: 'PUT',
+      body: JSON.stringify({ status, current_bab }),
+    });
+  },
+
+  // === MAHASISWA ===
+  // Get progress mahasiswa sendiri
+  getMahasiswaProgress: async () => {
+    return apiFetch('/dokumen/mahasiswa/progress');
+  },
+
+  // Upload dokumen
+  uploadDokumen: async (dokumenData: any) => {
+    return apiFetch('/dokumen/mahasiswa/upload', {
+      method: 'POST',
+      body: JSON.stringify(dokumenData),
+    });
+  },
+
+  // Get dokumen mahasiswa sendiri
+  getMahasiswaDokumen: async () => {
+    return apiFetch('/dokumen/mahasiswa/dokumen');
+  },
+};
