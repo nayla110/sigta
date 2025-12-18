@@ -5,7 +5,6 @@ const fs = require('fs');
 // Konfigurasi storage untuk multer
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    // Ambil mahasiswa_id dari req.user (dari JWT token)
     const mahasiswaId = req.user.id;
     const uploadPath = path.join(__dirname, '../uploads', mahasiswaId);
     
@@ -17,7 +16,6 @@ const storage = multer.diskStorage({
     cb(null, uploadPath);
   },
   filename: function (req, file, cb) {
-    // Generate nama file: timestamp_originalname
     const uniqueSuffix = Date.now();
     const ext = path.extname(file.originalname);
     const basename = path.basename(file.originalname, ext);
@@ -25,7 +23,6 @@ const storage = multer.diskStorage({
   }
 });
 
-// Filter file (hanya terima PDF, DOC, DOCX)
 const fileFilter = (req, file, cb) => {
   const allowedTypes = [
     'application/pdf',
@@ -40,7 +37,6 @@ const fileFilter = (req, file, cb) => {
   }
 };
 
-// Konfigurasi multer
 const upload = multer({
   storage: storage,
   fileFilter: fileFilter,
