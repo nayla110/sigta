@@ -3,6 +3,7 @@ const express = require('express');
 const router = express.Router();
 const dokumenController = require('../controllers/dokumenController');
 const { authenticate } = require('../middleware/auth');
+const upload = require('../middleware/upload');
 
 // Semua routes butuh authentication
 router.use(authenticate);
@@ -23,12 +24,16 @@ router.put('/dosen/dokumen/:dokumenId/review', dokumenController.reviewDokumen);
 // Update status progress mahasiswa (untuk edit status di modal)
 router.put('/dosen/mahasiswa/:mahasiswaId/status', dokumenController.updateMahasiswaStatus);
 
+// ⭐ TAMBAHAN BARU: Download dan View Dokumen
+router.get('/dosen/dokumen/:dokumenId/download', dokumenController.downloadDokumen);
+router.get('/dosen/dokumen/:dokumenId/view', dokumenController.viewDokumen);
+
 // ============= MAHASISWA ROUTES =============
 // Get progress mahasiswa sendiri (untuk validasi upload)
 router.get('/mahasiswa/progress', dokumenController.getMahasiswaProgress);
 
-// Upload dokumen
-router.post('/mahasiswa/upload', dokumenController.uploadDokumen);
+// ⭐ UPDATE: Upload dokumen dengan multer
+router.post('/mahasiswa/upload', upload.single('file'), dokumenController.uploadDokumen);
 
 // Get dokumen mahasiswa sendiri
 router.get('/mahasiswa/dokumen', dokumenController.getMahasiswaDokumen);

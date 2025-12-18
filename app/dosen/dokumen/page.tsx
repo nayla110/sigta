@@ -170,6 +170,9 @@ export default function DokumenTugasAkhirPage() {
     });
   };
 
+
+
+
   if (isLoading) {
     return (
       <div className="p-4 border-b pb-4">
@@ -329,54 +332,49 @@ export default function DokumenTugasAkhirPage() {
               <h3 className="text-xl font-semibold mb-4 text-gray-800">Riwayat Dokumen</h3>
               
               <div className="space-y-3 max-h-96 overflow-y-auto">
-                {dokumenList.length === 0 ? (
+                {dokumen.length === 0 ? (
                   <p className="text-center text-gray-500 py-8">Belum ada dokumen yang diupload</p>
                 ) : (
-                  dokumenList.map((doc) => (
-                    <div 
-                      key={doc.id}
-                      className="flex justify-between items-center p-3 border-b border-gray-100 last:border-b-0 hover:bg-gray-50 transition-colors"
-                    >
-                      <div className="flex items-center flex-1">
-                        <FileText className="w-5 h-5 mr-3 text-blue-500" />
-                        <div className="flex-1">
-                          <p className="text-sm font-medium text-gray-700">{doc.nama_file}</p>
-                          <p className="text-xs text-gray-500">
-                            {formatDate(doc.uploaded_at)} - {doc.jenis_berkas}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <span className={`px-2 py-1 rounded text-xs font-semibold ${
-                          doc.status === 'Disetujui' 
-                            ? 'bg-green-100 text-green-700'
-                            : doc.status === 'Ditolak'
-                            ? 'bg-red-100 text-red-700'
-                            : 'bg-yellow-100 text-yellow-700'
-                        }`}>
-                          {doc.status}
-                        </span>
-                        {doc.status === 'Menunggu' && (
+                  dokumen
+                    .filter(d => d.jenis_berkas.includes('TA'))
+                    .map((doc, i) => (
+                      <tr key={doc.id} className={i % 2 === 0 ? 'bg-gray-50' : 'bg-white'}>
+                        <td className="px-4 py-3 border">
+                          <div className="flex items-center gap-2">
+                            {getStatusIcon(doc.status)}
+                            <span className="font-medium">{doc.jenis_berkas}</span>
+                          </div>
+                        </td>
+                        <td className="px-4 py-3 border">{doc.nama_file}</td>
+                        <td className="px-4 py-3 border text-sm">{formatDate(doc.uploaded_at)}</td>
+                        <td className="px-4 py-3 border">
+                          <span className={`px-3 py-1 rounded-full text-xs font-semibold border ${getStatusColor(doc.status)}`}>
+                            {doc.status}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3 border text-sm">
+                          {doc.catatan || (doc.status === 'Menunggu' ? 'Menunggu review dosen' : '-')}
+                        </td>
+                        <td className="px-4 py-3 border">
                           <div className="flex gap-2">
                             <button
-                              onClick={() => handleReviewAction('Disetujui', doc.id)}
-                              className="text-green-600 hover:text-green-800"
-                              title="Setujui"
+                              onClick={() => handleViewDokumen(doc.id)}
+                              className="px-3 py-1 bg-blue-500 text-white rounded text-xs hover:bg-blue-600"
+                              title="Lihat Dokumen"
                             >
-                              <CheckCircle className="w-5 h-5" />
+                              Lihat
                             </button>
                             <button
-                              onClick={() => handleReviewAction('Ditolak', doc.id)}
-                              className="text-red-600 hover:text-red-800"
-                              title="Tolak"
+                              onClick={() => handleDownloadDokumen(doc.id, doc.nama_file)}
+                              className="px-3 py-1 bg-green-500 text-white rounded text-xs hover:bg-green-600"
+                              title="Download"
                             >
-                              <XCircle className="w-5 h-5" />
+                              Download
                             </button>
                           </div>
-                        )}
-                      </div>
-                    </div>
-                  ))
+                        </td>
+                      </tr>
+                    ))
                 )}
               </div>
             </div>
@@ -466,3 +464,46 @@ export default function DokumenTugasAkhirPage() {
     </div>
   );
 }
+
+const handleDownloadDokumen = async (dokumenId: string, namaFile: string) => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`http://localhost:5000/api/dokumen/dosen/dokumen/${dokumenId}/download`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (response.ok) {
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = namaFile;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+      } else {
+        const data = await response.json();
+        alert(data.message || 'Gagal mengunduh dokumen');
+      }
+    } catch (error) {
+      console.error('Download error:', error);
+      alert('Gagal mengunduh dokumen');
+    }
+  };
+
+  const handleViewDokumen = async (dokumenId: string) => {
+    try {
+      const token = localStorage.getItem('token');
+      const url = `http://localhost:5000/api/dokumen/dosen/dokumen/${dokumenId}/view`;
+      
+      // Buka di tab baru
+      window.open(url + '?token=' + encodeURIComponent(token || ''), '_blank');
+    } catch (error) {
+      console.error('View error:', error);
+      alert('Gagal membuka dokumen');
+    }
+  };

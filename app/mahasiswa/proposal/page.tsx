@@ -90,13 +90,11 @@ export default function ProposalPage() {
       return;
     }
 
-    // Validasi: hanya bisa upload BAB yang diizinkan
     if (babNumber !== progress.next_bab) {
       alert(`Anda hanya bisa mengupload BAB ${progress.next_bab}. Selesaikan BAB sebelumnya terlebih dahulu.`);
       return;
     }
 
-    // Cek apakah sudah ada dokumen pending untuk BAB ini
     const hasPending = dokumenList.some(
       d => d.jenis_berkas.includes(`BAB ${babNumber}`) && d.status === 'Menunggu'
     );
@@ -109,25 +107,38 @@ export default function ProposalPage() {
     try {
       setIsUploading(true);
 
-      const dokumenData = {
-        jenis_berkas: `Proposal BAB ${babNumber}`,
-        nama_file: entry.file.name,
-        catatan: entry.note || null
-      };
+      // Buat FormData untuk kirim file
+      const formData = new FormData();
+      formData.append('file', entry.file);
+      formData.append('jenis_berkas', `Proposal BAB ${babNumber}`);
+      if (entry.note) {
+        formData.append('catatan', entry.note);
+      }
 
-      const response = await dokumenAPI.uploadDokumen(dokumenData);
+      // Kirim ke backend dengan FormData
+      const token = localStorage.getItem('token');
+      const response = await fetch('http://localhost:5000/api/dokumen/mahasiswa/upload', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        },
+        body: formData // Kirim FormData, JANGAN set Content-Type
+      });
 
-      if (response.success) {
+      const data = await response.json();
+
+      if (response.ok && data.success) {
         alert('Dokumen berhasil diupload dan menunggu review dosen!');
         
-        // Reset form
         setForms(prev => prev.map((f, i) => (i === idx ? { file: null, note: '' } : f)));
         setOpen(prev => prev.map((v, i) => (i === idx ? false : v)));
         
-        // Refresh data
         fetchData();
+      } else {
+        alert(data.message || 'Gagal mengupload dokumen');
       }
     } catch (error: any) {
+      console.error('Upload error:', error);
       alert(error.message || 'Gagal mengupload dokumen');
     } finally {
       setIsUploading(false);
@@ -418,3 +429,4 @@ export default function ProposalPage() {
     </div>
   );
 }
+
