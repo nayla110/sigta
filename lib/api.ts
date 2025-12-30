@@ -68,7 +68,7 @@ async function apiFetch(
   }
 }
 
-// ============= AUTH API (NEW) =============
+// ============= AUTH API =============
 
 export const authAPI = {
   // Login Admin
@@ -80,7 +80,6 @@ export const authAPI = {
     
     if (data.success && data.data.token) {
       setToken(data.data.token);
-      // Simpan ke cookie juga untuk middleware
       if (typeof window !== 'undefined') {
         document.cookie = `token=${data.data.token}; path=/; max-age=${7 * 24 * 60 * 60}`;
       }
@@ -145,7 +144,6 @@ export const adminAPI = {
     } catch (error) {
       console.error('Logout API error:', error);
     } finally {
-      // Selalu hapus token meskipun API error
       removeToken();
     }
   },
@@ -161,22 +159,21 @@ export const adminAPI = {
   },
 };
 
-// ============= DOSEN API =============
-
-// Tambahkan di bagian DOSEN API
+// ============= DOSEN API (GABUNGAN SEMUA FUNGSI) =============
 
 export const dosenAPI = {
-  // Get all dosen (untuk admin)
+  // === UNTUK ADMIN ===
+  // Get all dosen
   getAll: async () => {
     return apiFetch('/dosen');
   },
 
-  // Get dosen by ID (untuk admin)
+  // Get dosen by ID
   getById: async (id: string) => {
     return apiFetch(`/dosen/${id}`);
   },
 
-  // Create dosen (untuk admin)
+  // Create dosen
   create: async (dosenData: any) => {
     return apiFetch('/dosen', {
       method: 'POST',
@@ -184,7 +181,7 @@ export const dosenAPI = {
     });
   },
 
-  // Update dosen (untuk admin)
+  // Update dosen (admin)
   update: async (id: string, dosenData: any) => {
     return apiFetch(`/dosen/${id}`, {
       method: 'PUT',
@@ -192,7 +189,7 @@ export const dosenAPI = {
     });
   },
 
-  // Delete dosen (untuk admin)
+  // Delete dosen
   delete: async (id: string) => {
     return apiFetch(`/dosen/${id}`, {
       method: 'DELETE',
@@ -210,31 +207,84 @@ export const dosenAPI = {
     return apiFetch('/dosen/mahasiswa-bimbingan');
   },
 
-  // Update own profile
+  // Update own profile (simple)
   updateProfile: async (profileData: any) => {
     return apiFetch('/dosen/profile', {
       method: 'PUT',
       body: JSON.stringify(profileData),
     });
   },
+
+  // Update profile lengkap
+  updateProfileLengkap: async (profileData: any) => {
+    return apiFetch('/dosen/update-profile', {
+      method: 'PUT',
+      body: JSON.stringify(profileData),
+    });
+  },
+
+  // Update password
+  updatePassword: async (passwordData: {
+    password_lama: string;
+    password_baru: string;
+    konfirmasi_password: string;
+  }) => {
+    return apiFetch('/dosen/update-password', {
+      method: 'PUT',
+      body: JSON.stringify(passwordData),
+    });
+  },
+
+  // Upload foto profile
+  uploadFotoProfile: async (file: File) => {
+    const token = getToken();
+    const formData = new FormData();
+    formData.append('foto', file);
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/dosen/upload-foto`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+        body: formData,
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        if (response.status === 401) {
+          removeToken();
+          if (typeof window !== 'undefined') {
+            window.location.href = '/login';
+          }
+        }
+        throw new Error(data.message || 'Gagal upload foto');
+      }
+
+      return data;
+    } catch (error: any) {
+      console.error('Upload foto error:', error);
+      throw error;
+    }
+  },
 };
 
-
-
-// ============= MAHASISWA API =============
+// ============= MAHASISWA API (GABUNGAN SEMUA FUNGSI) =============
 
 export const mahasiswaAPI = {
-  // Get all mahasiswa (untuk admin)
+  // === UNTUK ADMIN ===
+  // Get all mahasiswa
   getAll: async () => {
     return apiFetch('/mahasiswa');
   },
 
-  // Get mahasiswa by ID (untuk admin)
+  // Get mahasiswa by ID
   getById: async (id: string) => {
     return apiFetch(`/mahasiswa/${id}`);
   },
 
-  // Create mahasiswa (untuk admin)
+  // Create mahasiswa
   create: async (mahasiswaData: any) => {
     return apiFetch('/mahasiswa', {
       method: 'POST',
@@ -242,7 +292,7 @@ export const mahasiswaAPI = {
     });
   },
 
-  // Update mahasiswa (untuk admin)
+  // Update mahasiswa (admin)
   update: async (id: string, mahasiswaData: any) => {
     return apiFetch(`/mahasiswa/${id}`, {
       method: 'PUT',
@@ -250,7 +300,7 @@ export const mahasiswaAPI = {
     });
   },
 
-  // Delete mahasiswa (untuk admin)
+  // Delete mahasiswa
   delete: async (id: string) => {
     return apiFetch(`/mahasiswa/${id}`, {
       method: 'DELETE',
@@ -263,7 +313,7 @@ export const mahasiswaAPI = {
     return apiFetch('/mahasiswa/profile');
   },
 
-  // Update own profile
+  // Update own profile (simple)
   updateProfile: async (profileData: any) => {
     return apiFetch('/mahasiswa/profile', {
       method: 'PUT',
@@ -274,6 +324,61 @@ export const mahasiswaAPI = {
   // Get dashboard data
   getDashboardData: async () => {
     return apiFetch('/mahasiswa/dashboard');
+  },
+
+  // Update profile lengkap
+  updateProfile: async (profileData: any) => {
+  return apiFetch('/mahasiswa/profile', {
+    method: 'PUT',
+    body: JSON.stringify(profileData),
+  });
+},
+
+
+  // Update password
+  updatePassword: async (passwordData: {
+    password_lama: string;
+    password_baru: string;
+    konfirmasi_password: string;
+  }) => {
+    return apiFetch('/mahasiswa/update-password', {
+      method: 'PUT',
+      body: JSON.stringify(passwordData),
+    });
+  },
+
+  // Upload foto profile
+  uploadFotoProfile: async (file: File) => {
+    const token = getToken();
+    const formData = new FormData();
+    formData.append('foto', file);
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/mahasiswa/upload-foto`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+        body: formData,
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        if (response.status === 401) {
+          removeToken();
+          if (typeof window !== 'undefined') {
+            window.location.href = '/login';
+          }
+        }
+        throw new Error(data.message || 'Gagal upload foto');
+      }
+
+      return data;
+    } catch (error: any) {
+      console.error('Upload foto error:', error);
+      throw error;
+    }
   },
 };
 
@@ -354,7 +459,7 @@ export const bimbinganAPI = {
     return apiFetch(url);
   },
 
-  // Get jadwal kalender (⭐ TAMBAHKAN INI)
+  // Get jadwal kalender
   getDosenJadwalKalender: async (month?: number, year?: number) => {
     let url = '/bimbingan/dosen/jadwal-kalender';
     if (month && year) {

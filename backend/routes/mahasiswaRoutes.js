@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const mahasiswaController = require('../controllers/mahasiswaController');
 const { authenticate } = require('../middleware/auth');
+const uploadProfile = require('../middleware/uploadProfile'); 
 
 // Semua routes butuh authentication
 router.use(authenticate);
@@ -10,8 +11,10 @@ router.use(authenticate);
 // Get current mahasiswa profile
 router.get('/profile', mahasiswaController.getCurrentProfile);
 
-// Update own profile
-router.put('/profile', mahasiswaController.updateOwnProfile);
+// ⭐⭐⭐ TAMBAHAN BARU: UPDATE PROFILE ⭐⭐⭐
+router.put('/profile', mahasiswaController.updateProfile); // ✅ DITAMBAHKAN
+router.put('/update-password', mahasiswaController.updatePassword);
+router.post('/upload-foto', uploadProfile.single('foto'), mahasiswaController.uploadFotoProfile);
 
 // Get dashboard data
 router.get('/dashboard', mahasiswaController.getDashboardData);
