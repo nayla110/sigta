@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const path = require('path'); // ⭐ TAMBAHKAN INI
 require('dotenv').config();
 
 const app = express();
@@ -7,6 +8,9 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// ⭐ TAMBAHKAN INI - Serve static files untuk upload
+app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
 
 // Import Routes
 const authRoutes = require('./routes/authRoutes');
@@ -16,7 +20,7 @@ const mahasiswaRoutes = require('./routes/mahasiswaRoutes');
 const beritaRoutes = require('./routes/beritaRoutes');
 const programStudiRoutes = require('./routes/programStudiRoutes');
 const bimbinganRoutes = require('./routes/bimbinganRoutes');
-const dokumenRoutes = require('./routes/dokumenRoutes'); // ⭐ TAMBAHKAN INI
+const dokumenRoutes = require('./routes/dokumenRoutes');
 
 // Use Routes
 app.use('/api/auth', authRoutes);
@@ -26,7 +30,7 @@ app.use('/api/mahasiswa', mahasiswaRoutes);
 app.use('/api/berita', beritaRoutes);
 app.use('/api/program-studi', programStudiRoutes);
 app.use('/api/bimbingan', bimbinganRoutes);
-app.use('/api/dokumen', dokumenRoutes); // ⭐ TAMBAHKAN INI
+app.use('/api/dokumen', dokumenRoutes);
 
 app.get('/', (req, res) => {
   res.json({ 
@@ -39,7 +43,7 @@ app.get('/', (req, res) => {
       berita: '/api/berita',
       programStudi: '/api/program-studi',
       bimbingan: '/api/bimbingan',
-      dokumen: '/api/dokumen' // ⭐ TAMBAHKAN INI
+      dokumen: '/api/dokumen'
     }
   });
 });
@@ -49,4 +53,5 @@ const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
   console.log(`📝 API available at http://localhost:${PORT}/api`);
+  console.log(`📁 Static files served from /uploads`);
 });

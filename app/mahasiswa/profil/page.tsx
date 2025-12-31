@@ -231,19 +231,24 @@ export default function ProfilMahasiswa() {
     }
 
     try {
+      console.log('📤 Uploading foto...', selectedFile.name);
       const response = await mahasiswaAPI.uploadFotoProfile(selectedFile);
+      
+      console.log('✅ Upload response:', response);
       
       if (response.success) {
         alert('Foto profil berhasil diupload!');
         setShowPhotoModal(false);
         setSelectedFile(null);
         setPreviewUrl(null);
-        fetchProfile(); // Refresh profile
+        
+        // Refresh profile untuk mendapatkan foto baru
+        await fetchProfile();
       } else {
         alert(response.message || 'Gagal upload foto');
       }
     } catch (err: any) {
-      console.error('Error uploading photo:', err);
+      console.error('❌ Error uploading photo:', err);
       alert(err.message || 'Terjadi kesalahan saat upload foto');
     }
   };
@@ -309,9 +314,15 @@ export default function ProfilMahasiswa() {
             <div className="w-32 h-32 bg-gradient-to-br from-green-100 to-green-200 rounded-full flex items-center justify-center shadow-md overflow-hidden">
               {mahasiswa.foto_profil ? (
                 <img 
-                  src={mahasiswa.foto_profil} 
+                  src={`http://localhost:5000${mahasiswa.foto_profil}`}
                   alt="Foto Profil" 
                   className="w-full h-full object-cover"
+                  onError={(e) => {
+                    console.error('❌ Error loading image:', mahasiswa.foto_profil);
+                    // Fallback ke default avatar
+                    e.currentTarget.style.display = 'none';
+                    e.currentTarget.parentElement!.innerHTML = '<svg class="w-16 h-16 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>';
+                  }}
                 />
               ) : (
                 <User className="w-16 h-16 text-green-600" />

@@ -464,6 +464,15 @@ exports.uploadFotoProfile = async (req, res) => {
     const mahasiswaId = req.user.id;
     const file = req.file;
 
+    console.log('📸 Upload foto request:', {
+      mahasiswaId,
+      file: file ? {
+        filename: file.filename,
+        size: file.size,
+        mimetype: file.mimetype
+      } : 'No file'
+    });
+
     if (!file) {
       return res.status(400).json({
         success: false,
@@ -471,14 +480,18 @@ exports.uploadFotoProfile = async (req, res) => {
       });
     }
 
-    // Path foto (sesuaikan dengan struktur folder upload Anda)
+    // Path foto (akan diakses dari frontend sebagai URL)
     const fotoUrl = `/uploads/profile/${file.filename}`;
+
+    console.log('💾 Saving foto URL to database:', fotoUrl);
 
     // Update foto_profil di database
     await db.query(
       'UPDATE mahasiswa SET foto_profil = ?, updated_at = NOW() WHERE id = ?',
       [fotoUrl, mahasiswaId]
     );
+
+    console.log('✅ Foto profil berhasil diupload');
 
     res.json({
       success: true,
@@ -488,10 +501,11 @@ exports.uploadFotoProfile = async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Error uploading foto profile:', error);
+    console.error('❌ Error uploading foto profile:', error);
     res.status(500).json({
       success: false,
-      message: 'Gagal mengupload foto profil'
+      message: 'Gagal mengupload foto profil',
+      error: error.message
     });
   }
 };
