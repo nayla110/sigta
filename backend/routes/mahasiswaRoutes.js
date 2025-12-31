@@ -4,22 +4,31 @@ const mahasiswaController = require('../controllers/mahasiswaController');
 const { authenticate } = require('../middleware/auth');
 const uploadProfile = require('../middleware/uploadProfile'); 
 
-// Semua routes butuh authentication
+// ============================================
+// ROUTES UNTUK MAHASISWA YANG LOGIN
+// ============================================
+// Semua routes di bawah ini butuh authentication
 router.use(authenticate);
 
-// === ROUTES UNTUK MAHASISWA YANG LOGIN ===
 // Get current mahasiswa profile
 router.get('/profile', mahasiswaController.getCurrentProfile);
 
-// ⭐⭐⭐ TAMBAHAN BARU: UPDATE PROFILE ⭐⭐⭐
-router.put('/profile', mahasiswaController.updateProfile); // ✅ DITAMBAHKAN
+// Update profile mahasiswa (LENGKAP - dengan semua field)
+router.put('/profile', mahasiswaController.updateProfile);
+
+// Update password mahasiswa
 router.put('/update-password', mahasiswaController.updatePassword);
+
+// Upload foto profile
 router.post('/upload-foto', uploadProfile.single('foto'), mahasiswaController.uploadFotoProfile);
 
 // Get dashboard data
 router.get('/dashboard', mahasiswaController.getDashboardData);
 
-// === ROUTES UNTUK ADMIN (CRUD MAHASISWA) ===
+// ============================================
+// ROUTES UNTUK ADMIN (CRUD MAHASISWA)
+// ============================================
+
 // Get all mahasiswa
 router.get('/', mahasiswaController.getAllMahasiswa);
 
@@ -29,7 +38,7 @@ router.get('/:id', mahasiswaController.getMahasiswaById);
 // Create mahasiswa
 router.post('/', mahasiswaController.createMahasiswa);
 
-// Update mahasiswa
+// Update mahasiswa (admin)
 router.put('/:id', mahasiswaController.updateMahasiswa);
 
 // Delete mahasiswa

@@ -207,17 +207,9 @@ export const dosenAPI = {
     return apiFetch('/dosen/mahasiswa-bimbingan');
   },
 
-  // Update own profile (simple)
+  // Update own profile
   updateProfile: async (profileData: any) => {
     return apiFetch('/dosen/profile', {
-      method: 'PUT',
-      body: JSON.stringify(profileData),
-    });
-  },
-
-  // Update profile lengkap
-  updateProfileLengkap: async (profileData: any) => {
-    return apiFetch('/dosen/update-profile', {
       method: 'PUT',
       body: JSON.stringify(profileData),
     });
@@ -313,7 +305,12 @@ export const mahasiswaAPI = {
     return apiFetch('/mahasiswa/profile');
   },
 
-  // Update own profile (simple)
+  // Get dashboard data
+  getDashboardData: async () => {
+    return apiFetch('/mahasiswa/dashboard');
+  },
+
+  // ✅ Update profile (LENGKAP - INI SATU-SATUNYA)
   updateProfile: async (profileData: any) => {
     return apiFetch('/mahasiswa/profile', {
       method: 'PUT',
@@ -321,21 +318,7 @@ export const mahasiswaAPI = {
     });
   },
 
-  // Get dashboard data
-  getDashboardData: async () => {
-    return apiFetch('/mahasiswa/dashboard');
-  },
-
-  // Update profile lengkap
-  updateProfile: async (profileData: any) => {
-  return apiFetch('/mahasiswa/profile', {
-    method: 'PUT',
-    body: JSON.stringify(profileData),
-  });
-},
-
-
-  // Update password
+  // ✅ Update password
   updatePassword: async (passwordData: {
     password_lama: string;
     password_baru: string;
@@ -347,7 +330,7 @@ export const mahasiswaAPI = {
     });
   },
 
-  // Upload foto profile
+  // ✅ Upload foto profile
   uploadFotoProfile: async (file: File) => {
     const token = getToken();
     const formData = new FormData();

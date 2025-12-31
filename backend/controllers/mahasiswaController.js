@@ -124,7 +124,7 @@ exports.createMahasiswa = async (req, res) => {
   }
 };
 
-// Update Mahasiswa
+// Update Mahasiswa (Admin)
 exports.updateMahasiswa = async (req, res) => {
   try {
     const { id } = req.params;
@@ -231,6 +231,10 @@ exports.deleteMahasiswa = async (req, res) => {
   }
 };
 
+// ============================================
+// MAHASISWA YANG LOGIN - PROFILE MANAGEMENT
+// ============================================
+
 // Get Current Mahasiswa Profile (yang sedang login)
 exports.getCurrentProfile = async (req, res) => {
   try {
@@ -268,11 +272,55 @@ exports.getCurrentProfile = async (req, res) => {
   }
 };
 
-// Update Profile Simple
-exports.updateProfileSimple = async (req, res) => {
+// Update Profile Mahasiswa (Lengkap - dengan semua field)
+exports.updateProfile = async (req, res) => {
   try {
     const mahasiswaId = req.user.id;
-    const { nama, email, no_telp, judul_ta } = req.body;
+    const { 
+      nama, 
+      email, 
+      no_telp, 
+      alamat,
+      tanggal_lahir,
+      jenis_kelamin,
+      judul_ta
+    } = req.body;
+
+    // Validasi input wajib
+    if (!nama || !email) {
+      return res.status(400).json({
+        success: false,
+        message: 'Nama dan Email wajib diisi'
+      });
+    }
+
+    // Validasi format email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Format email tidak valid'
+      });
+    }
+
+    // Validasi nomor telepon (opsional, tapi jika diisi harus valid)
+    if (no_telp) {
+      const phoneRegex = /^(\+62|62|0)[0-9]{9,12}$/;
+      if (!phoneRegex.test(no_telp.replace(/\s/g, ''))) {
+        return res.status(400).json({
+          success: false,
+          message: 'Format nomor telepon tidak valid (contoh: 081234567890)'
+        });
+      }
+    }
+
+    // Validasi jenis kelamin
+    if (jenis_kelamin && !['L', 'P'].includes(jenis_kelamin)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Jenis kelamin harus L (Laki-laki) atau P (Perempuan)'
+      });
+    }
 
     // Cek apakah mahasiswa ada
     const [existing] = await db.query(
@@ -305,20 +353,145 @@ exports.updateProfileSimple = async (req, res) => {
     // Update profile
     await db.query(
       `UPDATE mahasiswa 
-       SET nama = ?, email = ?, no_telp = ?, judul_ta = ?, updated_at = NOW()
+       SET nama = ?, email = ?, no_telp = ?, alamat = ?,
+           tanggal_lahir = ?, jenis_kelamin = ?, judul_ta = ?,
+           updated_at = NOW()
        WHERE id = ?`,
-      [nama, email, no_telp, judul_ta, mahasiswaId]
+      [nama, email, no_telp || null, alamat || null, tanggal_lahir || null, jenis_kelamin || null, judul_ta || null, mahasiswaId]
+    );
+
+    // Ambil data yang sudah diupdate
+    const [updated] = await db.query(
+      `SELECT m.id, m.nim, m.nama, m.email, m.no_telp, m.alamat, 
+              m.tanggal_lahir, m.jenis_kelamin, m.judul_ta, m.foto_profil,
+              p.nama as program_studi_nama
+       FROM mahasiswa m
+       LEFT JOIN program_studi p ON m.program_studi_id = p.id
+       WHERE m.id = ?`,
+      [mahasiswaId]
     );
 
     res.json({
       success: true,
-      message: 'Profil berhasil diupdate'
+      message: 'Profil berhasil diupdate',
+      data: updated[0]
     });
   } catch (error) {
     console.error('Error updating mahasiswa profile:', error);
     res.status(500).json({
       success: false,
       message: 'Gagal mengupdate profil'
+    });
+  }
+};
+
+// Update Password Mahasiswa
+exports.updatePassword = async (req, res) => {
+  try {
+    const mahasiswaId = req.user.id;
+    const { password_lama, password_baru, konfirmasi_password } = req.body;
+
+    // Validasi input
+    if (!password_lama || !password_baru || !konfirmasi_password) {
+      return res.status(400).json({
+        success: false,
+        message: 'Semua field password harus diisi'
+      });
+    }
+
+    if (password_baru !== konfirmasi_password) {
+      return res.status(400).json({
+        success: false,
+        message: 'Password baru dan konfirmasi password tidak cocok'
+      });
+    }
+
+    if (password_baru.length < 6) {
+      return res.status(400).json({
+        success: false,
+        message: 'Password baru minimal 6 karakter'
+      });
+    }
+
+    // Ambil password lama dari database
+    const [mahasiswa] = await db.query(
+      'SELECT password FROM mahasiswa WHERE id = ?',
+      [mahasiswaId]
+    );
+
+    if (mahasiswa.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: 'Mahasiswa tidak ditemukan'
+      });
+    }
+
+    // Verifikasi password lama
+    const isPasswordValid = await bcrypt.compare(password_lama, mahasiswa[0].password);
+    
+    if (!isPasswordValid) {
+      return res.status(401).json({
+        success: false,
+        message: 'Password lama tidak sesuai'
+      });
+    }
+
+    // Hash password baru
+    const hashedPassword = await bcrypt.hash(password_baru, 10);
+
+    // Update password
+    await db.query(
+      'UPDATE mahasiswa SET password = ?, updated_at = NOW() WHERE id = ?',
+      [hashedPassword, mahasiswaId]
+    );
+
+    res.json({
+      success: true,
+      message: 'Password berhasil diupdate'
+    });
+  } catch (error) {
+    console.error('Error updating password:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Gagal mengupdate password'
+    });
+  }
+};
+
+// Upload Foto Profile
+exports.uploadFotoProfile = async (req, res) => {
+  try {
+    const mahasiswaId = req.user.id;
+    const file = req.file;
+
+    if (!file) {
+      return res.status(400).json({
+        success: false,
+        message: 'File foto tidak ditemukan'
+      });
+    }
+
+    // Path foto (sesuaikan dengan struktur folder upload Anda)
+    const fotoUrl = `/uploads/profile/${file.filename}`;
+
+    // Update foto_profil di database
+    await db.query(
+      'UPDATE mahasiswa SET foto_profil = ?, updated_at = NOW() WHERE id = ?',
+      [fotoUrl, mahasiswaId]
+    );
+
+    res.json({
+      success: true,
+      message: 'Foto profil berhasil diupload',
+      data: {
+        foto_profil: fotoUrl
+      }
+    });
+  } catch (error) {
+    console.error('Error uploading foto profile:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Gagal mengupload foto profil'
     });
   }
 };
@@ -368,209 +541,6 @@ exports.getDashboardData = async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Gagal mengambil data dashboard'
-    });
-  }
-};
-
-// Update Profile Mahasiswa (dengan field lengkap)
-exports.updateProfile = async (req, res) => {
-  try {
-    const mahasiswaId = req.user.id;
-    const { 
-      nama, 
-      email, 
-      no_telp, 
-      alamat,
-      tanggal_lahir,
-      jenis_kelamin,
-      judul_ta,
-      foto_profil 
-    } = req.body;
-
-    if (!nama || !email) {
-      return res.status(400).json({
-        success: false,
-        message: 'Nama dan Email wajib diisi'
-      });
-    }
-
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      return res.status(400).json({
-        success: false,
-        message: 'Format email tidak valid'
-      });
-    }
-
-    if (no_telp) {
-      const phoneRegex = /^(\+62|62|0)[0-9]{9,12}$/;
-      if (!phoneRegex.test(no_telp)) {
-        return res.status(400).json({
-          success: false,
-          message: 'Format nomor telepon tidak valid'
-        });
-      }
-    }
-
-    const [existing] = await db.query(
-      'SELECT * FROM mahasiswa WHERE id = ?',
-      [mahasiswaId]
-    );
-
-    if (existing.length === 0) {
-      return res.status(404).json({
-        success: false,
-        message: 'Mahasiswa tidak ditemukan'
-      });
-    }
-
-    if (email !== existing[0].email) {
-      const [duplicate] = await db.query(
-        'SELECT * FROM mahasiswa WHERE email = ? AND id != ?',
-        [email, mahasiswaId]
-      );
-
-      if (duplicate.length > 0) {
-        return res.status(400).json({
-          success: false,
-          message: 'Email sudah digunakan oleh mahasiswa lain'
-        });
-      }
-    }
-
-    await db.query(
-      `UPDATE mahasiswa 
-       SET nama = ?, email = ?, no_telp = ?, alamat = ?,
-           tanggal_lahir = ?, jenis_kelamin = ?, judul_ta = ?,
-           foto_profil = ?, updated_at = NOW()
-       WHERE id = ?`,
-      [nama, email, no_telp, alamat, tanggal_lahir, jenis_kelamin, judul_ta, foto_profil, mahasiswaId]
-    );
-
-    const [updated] = await db.query(
-      `SELECT m.id, m.nim, m.nama, m.email, m.no_telp, m.alamat, 
-              m.tanggal_lahir, m.jenis_kelamin, m.judul_ta, m.foto_profil,
-              p.nama as program_studi_nama
-       FROM mahasiswa m
-       LEFT JOIN program_studi p ON m.program_studi_id = p.id
-       WHERE m.id = ?`,
-      [mahasiswaId]
-    );
-
-    res.json({
-      success: true,
-      message: 'Profile berhasil diupdate',
-      data: updated[0]
-    });
-  } catch (error) {
-    console.error('Error updating mahasiswa profile:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Gagal mengupdate profile'
-    });
-  }
-};
-
-// Update Password Mahasiswa
-exports.updatePassword = async (req, res) => {
-  try {
-    const mahasiswaId = req.user.id;
-    const { password_lama, password_baru, konfirmasi_password } = req.body;
-
-    if (!password_lama || !password_baru || !konfirmasi_password) {
-      return res.status(400).json({
-        success: false,
-        message: 'Semua field password harus diisi'
-      });
-    }
-
-    if (password_baru !== konfirmasi_password) {
-      return res.status(400).json({
-        success: false,
-        message: 'Password baru dan konfirmasi password tidak cocok'
-      });
-    }
-
-    if (password_baru.length < 6) {
-      return res.status(400).json({
-        success: false,
-        message: 'Password baru minimal 6 karakter'
-      });
-    }
-
-    const [mahasiswa] = await db.query(
-      'SELECT password FROM mahasiswa WHERE id = ?',
-      [mahasiswaId]
-    );
-
-    if (mahasiswa.length === 0) {
-      return res.status(404).json({
-        success: false,
-        message: 'Mahasiswa tidak ditemukan'
-      });
-    }
-
-    const isPasswordValid = await bcrypt.compare(password_lama, mahasiswa[0].password);
-    
-    if (!isPasswordValid) {
-      return res.status(401).json({
-        success: false,
-        message: 'Password lama tidak sesuai'
-      });
-    }
-
-    const hashedPassword = await bcrypt.hash(password_baru, 10);
-
-    await db.query(
-      'UPDATE mahasiswa SET password = ?, updated_at = NOW() WHERE id = ?',
-      [hashedPassword, mahasiswaId]
-    );
-
-    res.json({
-      success: true,
-      message: 'Password berhasil diupdate'
-    });
-  } catch (error) {
-    console.error('Error updating password:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Gagal mengupdate password'
-    });
-  }
-};
-
-// Upload Foto Profile
-exports.uploadFotoProfile = async (req, res) => {
-  try {
-    const mahasiswaId = req.user.id;
-    const file = req.file;
-
-    if (!file) {
-      return res.status(400).json({
-        success: false,
-        message: 'File foto tidak ditemukan'
-      });
-    }
-
-    const fotoUrl = `/uploads/profile/${file.filename}`;
-
-    await db.query(
-      'UPDATE mahasiswa SET foto_profil = ?, updated_at = NOW() WHERE id = ?',
-      [fotoUrl, mahasiswaId]
-    );
-
-    res.json({
-      success: true,
-      message: 'Foto profile berhasil diupload',
-      data: {
-        foto_profil: fotoUrl
-      }
-    });
-  } catch (error) {
-    console.error('Error uploading foto profile:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Gagal mengupload foto profile'
     });
   }
 };
