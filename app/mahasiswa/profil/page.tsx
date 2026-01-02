@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { 
   User, Mail, Phone, GraduationCap, BookOpen, Award, 
   MapPin, Calendar, UserCircle, X, Save, Edit, Lock, Camera, Eye, EyeOff 
@@ -63,6 +63,7 @@ export default function ProfilMahasiswa() {
   // State untuk upload foto
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
 
@@ -212,16 +213,30 @@ export default function ProfilMahasiswa() {
     }
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      // Validasi ukuran file
       if (file.size > 5 * 1024 * 1024) {
         alert('Ukuran file maksimal 5MB');
         return;
       }
+      
+      // Validasi tipe file
+      if (!file.type.startsWith('image/')) {
+        alert('File harus berupa gambar');
+        return;
+      }
+
       setSelectedFile(file);
       setPreviewUrl(URL.createObjectURL(file));
+      setShowPhotoModal(true); // Buka modal untuk preview
     }
+  };
+
+  const handleCameraClick = () => {
+    // Trigger file input langsung
+    fileInputRef.current?.click();
   };
 
   const handleUploadPhoto = async () => {
@@ -250,6 +265,15 @@ export default function ProfilMahasiswa() {
     } catch (err: any) {
       console.error('❌ Error uploading photo:', err);
       alert(err.message || 'Terjadi kesalahan saat upload foto');
+    }
+  };
+
+  const handleCancelUpload = () => {
+    setShowPhotoModal(false);
+    setSelectedFile(null);
+    setPreviewUrl(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
     }
   };
 
@@ -330,13 +354,23 @@ export default function ProfilMahasiswa() {
             </div>
             {!isEditMode && (
               <button
-                onClick={() => setShowPhotoModal(true)}
+                onClick={handleCameraClick}
                 className="absolute bottom-0 right-1/2 transform translate-x-16 translate-y-2 bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-full shadow-lg"
+                title="Upload Foto Profil"
               >
                 <Camera className="w-4 h-4" />
               </button>
             )}
           </div>
+
+          {/* Hidden file input */}
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            onChange={handleFileChange}
+            className="hidden"
+          />
 
           <div className="text-center mb-4">
             <h2 className="text-xl font-bold text-gray-800">{mahasiswa.nama}</h2>
@@ -465,25 +499,37 @@ export default function ProfilMahasiswa() {
 
       {/* Modal Upload Foto */}
       {showPhotoModal && (
-        <Modal onClose={() => setShowPhotoModal(false)} title="Upload Foto Profil">
+        <Modal onClose={handleCancelUpload} title="Upload Foto Profil">
           <div className="space-y-4">
-            {previewUrl && (
-              <div className="flex justify-center">
-                <img src={previewUrl} alt="Preview" className="w-40 h-40 rounded-full object-cover" />
+            {previewUrl ? (
+              <>
+                <div className="flex justify-center">
+                  <img src={previewUrl} alt="Preview" className="w-48 h-48 rounded-full object-cover border-4 border-blue-200" />
+                </div>
+                <p className="text-center text-sm text-gray-600">
+                  {selectedFile?.name}
+                </p>
+                <div className="flex gap-3">
+                  <button
+                    onClick={handleUploadPhoto}
+                    className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg"
+                  >
+                    Upload Foto
+                  </button>
+                  <button
+                    onClick={handleCameraClick}
+                    className="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-700 font-medium py-2 px-4 rounded-lg"
+                  >
+                    Pilih Foto Lain
+                  </button>
+                </div>
+              </>
+            ) : (
+              <div className="text-center text-gray-500">
+                <Camera className="w-16 h-16 mx-auto mb-2 text-gray-400" />
+                <p>Memproses foto...</p>
               </div>
             )}
-            <input 
-              type="file" 
-              accept="image/*" 
-              onChange={handleFileChange}
-              className="w-full"
-            />
-            <button
-              onClick={handleUploadPhoto}
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg"
-            >
-              Upload Foto
-            </button>
           </div>
         </Modal>
       )}

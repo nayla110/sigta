@@ -10,7 +10,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // ⭐ TAMBAHKAN INI - Serve static files untuk upload
-app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
+app.use('/uploads/profile', express.static(path.join(__dirname, 'public/uploads/profile')));
 
 // Import Routes
 const authRoutes = require('./routes/authRoutes');

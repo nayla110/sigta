@@ -469,7 +469,8 @@ exports.uploadFotoProfile = async (req, res) => {
       file: file ? {
         filename: file.filename,
         size: file.size,
-        mimetype: file.mimetype
+        mimetype: file.mimetype,
+        path: file.path // TAMBAH INI untuk debug
       } : 'No file'
     });
 
@@ -480,18 +481,36 @@ exports.uploadFotoProfile = async (req, res) => {
       });
     }
 
-    // Path foto (akan diakses dari frontend sebagai URL)
+    // Path foto (PENTING: pastikan format benar!)
     const fotoUrl = `/uploads/profile/${file.filename}`;
 
     console.log('💾 Saving foto URL to database:', fotoUrl);
+    console.log('🔑 Mahasiswa ID:', mahasiswaId);
 
     // Update foto_profil di database
-    await db.query(
+    const [result] = await db.query(
       'UPDATE mahasiswa SET foto_profil = ?, updated_at = NOW() WHERE id = ?',
       [fotoUrl, mahasiswaId]
     );
 
-    console.log('✅ Foto profil berhasil diupload');
+    console.log('✅ Database update result:', result);
+
+    // CEK apakah update berhasil
+    if (result.affectedRows === 0) {
+      console.error('❌ No rows affected! Mahasiswa ID tidak ditemukan:', mahasiswaId);
+      return res.status(404).json({
+        success: false,
+        message: 'Mahasiswa tidak ditemukan'
+      });
+    }
+
+    // VERIFY: Baca kembali dari database
+    const [verify] = await db.query(
+      'SELECT foto_profil FROM mahasiswa WHERE id = ?',
+      [mahasiswaId]
+    );
+
+    console.log('🔍 Verify database after update:', verify[0]);
 
     res.json({
       success: true,
