@@ -13,7 +13,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     if (pathname?.includes('/bimbingan')) return 'Jadwal Bimbingan';
     if (pathname?.includes('/TA')) return 'Tugas Akhir';
     if (pathname?.includes('/profil')) return 'Profil Mahasiswa';
-    if (pathname?.includes('/setting')) return 'Pengaturan Akun';
     if (pathname?.includes('/proposal')) return 'Proposal';
     return 'Selamat Datang Mahasiswa';
   };
@@ -89,9 +88,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 <div className="absolute right-0 mt-3 w-44 bg-white text-gray-800 border rounded-lg shadow-md overflow-hidden z-50">
                   <Link href="/mahasiswa/profil" className="block px-4 py-2 text-sm hover:bg-gray-100">
                     Profil
-                  </Link>
-                  <Link href="/mahasiswa/setting" className="block px-4 py-2 text-sm hover:bg-gray-100">
-                    Pengaturan
                   </Link>
                   <button 
                     className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100 border-t" 

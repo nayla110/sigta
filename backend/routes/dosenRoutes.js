@@ -8,11 +8,9 @@ const uploadProfile = require('../middleware/uploadProfile');
 router.use(authenticate);
 
 // === ROUTES UNTUK DOSEN YANG LOGIN ===
-// Get current dosen profile
+// ⚠️ PENTING: Route /profile harus di atas route /:id
 router.get('/profile', dosenController.getCurrentProfile);
-
-// ⭐⭐⭐ TAMBAHAN BARU: UPDATE PROFILE ⭐⭐⭐
-router.put('/update-profile', dosenController.updateProfile);
+router.put('/profile', dosenController.updateProfile); // ✅ Gunakan /profile bukan /update-profile
 router.put('/update-password', dosenController.updatePassword);
 router.post('/upload-foto', uploadProfile.single('foto'), dosenController.uploadFotoProfile);
 
@@ -23,7 +21,7 @@ router.get('/mahasiswa-bimbingan', dosenController.getMahasiswaBimbingan);
 // Get all dosen
 router.get('/', dosenController.getAllDosen);
 
-// Get dosen by ID
+// Get dosen by ID (harus di bawah route /profile)
 router.get('/:id', dosenController.getDosenById);
 
 // Create dosen

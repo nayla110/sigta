@@ -161,19 +161,18 @@ export const adminAPI = {
 
 // ============= DOSEN API (GABUNGAN SEMUA FUNGSI) =============
 
+// ============= DOSEN API - PASTIKAN INI ADA DI lib/api.ts =============
+
 export const dosenAPI = {
   // === UNTUK ADMIN ===
-  // Get all dosen
   getAll: async () => {
     return apiFetch('/dosen');
   },
 
-  // Get dosen by ID
   getById: async (id: string) => {
     return apiFetch(`/dosen/${id}`);
   },
 
-  // Create dosen
   create: async (dosenData: any) => {
     return apiFetch('/dosen', {
       method: 'POST',
@@ -181,7 +180,6 @@ export const dosenAPI = {
     });
   },
 
-  // Update dosen (admin)
   update: async (id: string, dosenData: any) => {
     return apiFetch(`/dosen/${id}`, {
       method: 'PUT',
@@ -189,7 +187,6 @@ export const dosenAPI = {
     });
   },
 
-  // Delete dosen
   delete: async (id: string) => {
     return apiFetch(`/dosen/${id}`, {
       method: 'DELETE',
@@ -197,17 +194,15 @@ export const dosenAPI = {
   },
 
   // === UNTUK DOSEN YANG LOGIN ===
-  // Get current profile
   getCurrentProfile: async () => {
     return apiFetch('/dosen/profile');
   },
 
-  // Get mahasiswa bimbingan
   getMahasiswaBimbingan: async () => {
     return apiFetch('/dosen/mahasiswa-bimbingan');
   },
 
-  // Update own profile
+  // ✅ Update profile - gunakan PUT /dosen/profile
   updateProfile: async (profileData: any) => {
     return apiFetch('/dosen/profile', {
       method: 'PUT',
@@ -215,7 +210,7 @@ export const dosenAPI = {
     });
   },
 
-  // Update password
+  // ✅ Update password
   updatePassword: async (passwordData: {
     password_lama: string;
     password_baru: string;
@@ -227,7 +222,7 @@ export const dosenAPI = {
     });
   },
 
-  // Upload foto profile
+  // ✅ Upload foto profile
   uploadFotoProfile: async (file: File) => {
     const token = getToken();
     const formData = new FormData();
