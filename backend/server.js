@@ -21,6 +21,7 @@ const beritaRoutes = require('./routes/beritaRoutes');
 const programStudiRoutes = require('./routes/programStudiRoutes');
 const bimbinganRoutes = require('./routes/bimbinganRoutes');
 const dokumenRoutes = require('./routes/dokumenRoutes');
+const notificationRoutes = require('./routes/notificationRoutes');
 
 // Use Routes
 app.use('/api/auth', authRoutes);
@@ -31,6 +32,7 @@ app.use('/api/berita', beritaRoutes);
 app.use('/api/program-studi', programStudiRoutes);
 app.use('/api/bimbingan', bimbinganRoutes);
 app.use('/api/dokumen', dokumenRoutes);
+app.use('/api/notifications', notificationRoutes);
 
 app.get('/', (req, res) => {
   res.json({ 

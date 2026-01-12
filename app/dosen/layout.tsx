@@ -9,7 +9,6 @@ import { useEffect, useRef, useState } from 'react';
 // Tentukan judul header berdasarkan path
 const getHeaderTitle = (pathname: string) => {
   if (pathname.startsWith('/dosen/profile')) return 'Profil Dosen';
-  if (pathname.startsWith('/dosen/setting')) return 'Pengaturan Akun';
   if (pathname.startsWith('/dosen/dashboard') || pathname === '/dosen')
     return 'Selamat Datang';
   if (pathname.startsWith('/dosen/pengajuan')) return 'Pengajuan Bimbingan';
@@ -103,14 +102,6 @@ export default function DosenLayout({ children }: { children: React.ReactNode })
                     onClick={() => setOpenUser(false)}
                   >
                     Profil
-                  </Link>
-                  <Link
-                    href="/dosen/setting"
-                    className="block px-4 py-2 text-sm hover:bg-gray-100"
-                    role="menuitem"
-                    onClick={() => setOpenUser(false)}
-                  >
-                    Pengaturan
                   </Link>
                   <button
                     onClick={logout}

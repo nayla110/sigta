@@ -1,4 +1,3 @@
-// backend/controllers/dokumenController.js
 const db = require('../config/database');
 const path = require('path');
 const fs = require('fs');
@@ -42,7 +41,7 @@ exports.getMahasiswaBimbinganDetail = async (req, res) => {
   }
 };
 
-// Get Progress Mahasiswa
+// Get Progress Mahasiswa - FIXED dengan manual override
 exports.getProgressMahasiswa = async (req, res) => {
   try {
     const { mahasiswaId } = req.params;
@@ -77,7 +76,9 @@ exports.getProgressMahasiswa = async (req, res) => {
 
     let statusProgress = tugasAkhir.length > 0 ? tugasAkhir[0].status : 'Proposal';
     let currentBab = 0;
-    
+    let useManualProgress = tugasAkhir.length > 0 && tugasAkhir[0].use_manual_progress === 1;
+
+    // Hitung approved BABs dari berkas
     const approvedBabs = new Set();
     berkas.forEach(b => {
       const babMatch = b.jenis_berkas.match(/BAB\s*(\d+)/i);
@@ -86,10 +87,29 @@ exports.getProgressMahasiswa = async (req, res) => {
       }
     });
 
-    if (approvedBabs.size > 0) {
-      currentBab = Math.max(...Array.from(approvedBabs));
+    // Tentukan current_bab
+    if (useManualProgress && tugasAkhir[0].manual_current_bab) {
+      currentBab = tugasAkhir[0].manual_current_bab;
+      console.log('📊 Using MANUAL progress:', currentBab);
+    } else {
+      if (approvedBabs.size > 0) {
+        currentBab = Math.max(...Array.from(approvedBabs));
+      }
+      console.log('📊 Using AUTO-CALCULATED progress:', currentBab);
     }
 
+    // 🔥 UPDATE STATUS DULU
+    if (currentBab >= 4 && statusProgress === 'Proposal') {
+      statusProgress = 'TA';
+
+      await db.query(`
+        UPDATE tugas_akhir 
+        SET status = 'TA'
+        WHERE mahasiswa_id = ?
+      `, [mahasiswaId]);
+    }
+
+    // 🔥 BARU TENTUKAN maxBab
     const maxBab = statusProgress === 'Proposal' ? 3 : 5;
 
     res.json({
@@ -99,9 +119,11 @@ exports.getProgressMahasiswa = async (req, res) => {
         current_bab: currentBab,
         total_bab: maxBab,
         judul_ta: mahasiswa[0].judul_ta,
-        approved_babs: Array.from(approvedBabs).sort()
+        approved_babs: Array.from(approvedBabs).sort(),
+        is_manual_override: useManualProgress
       }
     });
+
   } catch (error) {
     console.error('Error getting progress:', error);
     res.status(500).json({
@@ -110,6 +132,7 @@ exports.getProgressMahasiswa = async (req, res) => {
     });
   }
 };
+
 
 // Get Riwayat Dokumen Mahasiswa
 exports.getRiwayatDokumen = async (req, res) => {
@@ -206,6 +229,102 @@ exports.reviewDokumen = async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Gagal mereview dokumen'
+    });
+  }
+};
+
+// Update Status Mahasiswa - FIXED dengan manual override
+exports.updateMahasiswaStatus = async (req, res) => {
+  try {
+    console.log('========================================');
+    console.log('🔄 UPDATE STATUS MAHASISWA - MANUAL OVERRIDE');
+    console.log('========================================');
+    
+    const { mahasiswaId } = req.params;
+    const { status, current_bab } = req.body;
+    const dosenId = req.user.id;
+
+    console.log('Mahasiswa ID:', mahasiswaId);
+    console.log('New Status:', status);
+    console.log('New BAB:', current_bab);
+
+    if (!status || !current_bab) {
+      return res.status(400).json({
+        success: false,
+        message: 'Status dan current_bab wajib diisi'
+      });
+    }
+
+    // Validasi status
+    if (!['Proposal', 'TA'].includes(status)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Status harus Proposal atau TA'
+      });
+    }
+
+    // Validasi current_bab
+    const bab = parseInt(current_bab);
+    if (isNaN(bab) || bab < 1 || bab > 5) {
+      return res.status(400).json({
+        success: false,
+        message: 'Current BAB harus antara 1-5'
+      });
+    }
+
+    const [mahasiswa] = await db.query(
+      'SELECT * FROM mahasiswa WHERE id = ? AND dosen_pembimbing_id = ?',
+      [mahasiswaId, dosenId]
+    );
+
+    if (mahasiswa.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: 'Mahasiswa tidak ditemukan'
+      });
+    }
+
+    console.log('Mahasiswa found:', mahasiswa[0].nama);
+
+    const [existingTA] = await db.query(
+      'SELECT * FROM tugas_akhir WHERE mahasiswa_id = ?',
+      [mahasiswaId]
+    );
+
+    if (existingTA.length > 0) {
+      // Update existing
+      await db.query(
+        `UPDATE tugas_akhir 
+         SET status = ?, manual_current_bab = ?, use_manual_progress = 1, updated_at = NOW() 
+         WHERE mahasiswa_id = ?`,
+        [status, bab, mahasiswaId]
+      );
+      console.log('✅ Updated existing tugas_akhir record');
+    } else {
+      // Insert new
+      const taId = `ta_${Date.now()}`;
+      await db.query(
+        `INSERT INTO tugas_akhir (id, mahasiswa_id, judul, status, manual_current_bab, use_manual_progress, updated_at, created_at)
+         VALUES (?, ?, ?, ?, ?, 1, NOW(), NOW())`,
+        [taId, mahasiswaId, mahasiswa[0].judul_ta || 'Belum ada judul', status, bab]
+      );
+      console.log('✅ Inserted new tugas_akhir record');
+    }
+
+    console.log('========================================');
+
+    res.json({
+      success: true,
+      message: `Status mahasiswa berhasil diupdate ke ${status} - BAB ${bab}`
+    });
+  } catch (error) {
+    console.error('========================================');
+    console.error('❌ Error updating mahasiswa status:', error);
+    console.error('========================================');
+    res.status(500).json({
+      success: false,
+      message: 'Gagal mengupdate status mahasiswa',
+      error: error.message
     });
   }
 };
@@ -323,7 +442,7 @@ exports.viewDokumen = async (req, res) => {
 
 // ============= MAHASISWA FUNCTIONS =============
 
-// Get Status Progress Mahasiswa
+// Get Status Progress Mahasiswa - FIXED dengan manual override
 exports.getMahasiswaProgress = async (req, res) => {
   try {
     const mahasiswaId = req.user.id;
@@ -346,6 +465,7 @@ exports.getMahasiswaProgress = async (req, res) => {
     let statusProgress = tugasAkhir.length > 0 ? tugasAkhir[0].status : 'Proposal';
     let currentBab = 0;
     let nextBab = 1;
+    let useManualProgress = tugasAkhir.length > 0 && tugasAkhir[0].use_manual_progress === 1;
     
     const approvedBabs = new Set();
     berkas.forEach(b => {
@@ -355,9 +475,19 @@ exports.getMahasiswaProgress = async (req, res) => {
       }
     });
 
-    if (approvedBabs.size > 0) {
-      currentBab = Math.max(...Array.from(approvedBabs));
+    // Tentukan current_bab (support manual override)
+    if (useManualProgress && tugasAkhir[0].manual_current_bab) {
+      // Gunakan manual override dari dosen
+      currentBab = tugasAkhir[0].manual_current_bab;
       nextBab = currentBab + 1;
+      console.log('📊 Mahasiswa using MANUAL progress:', currentBab);
+    } else {
+      // Auto-calculate dari approved berkas
+      if (approvedBabs.size > 0) {
+        currentBab = Math.max(...Array.from(approvedBabs));
+        nextBab = currentBab + 1;
+      }
+      console.log('📊 Mahasiswa using AUTO-CALCULATED progress:', currentBab);
     }
 
     const maxBab = statusProgress === 'Proposal' ? 3 : 5;
@@ -383,7 +513,7 @@ exports.getMahasiswaProgress = async (req, res) => {
   }
 };
 
-// Upload Dokumen (dengan multer)
+// Upload Dokumen - FIXED support manual override
 exports.uploadDokumen = async (req, res) => {
   try {
     const mahasiswaId = req.user.id;
@@ -423,6 +553,7 @@ exports.uploadDokumen = async (req, res) => {
 
     const statusProgress = tugasAkhir.length > 0 ? tugasAkhir[0].status : 'Proposal';
     const maxBab = statusProgress === 'Proposal' ? 3 : 5;
+    const useManualProgress = tugasAkhir.length > 0 && tugasAkhir[0].use_manual_progress === 1;
 
     const [approvedBerkas] = await db.query(`
       SELECT jenis_berkas
@@ -441,8 +572,21 @@ exports.uploadDokumen = async (req, res) => {
       }
     });
 
-    const nextAllowedBab = highestApprovedBab + 1;
+    // Tentukan next allowed BAB (support manual override)
+    let nextAllowedBab = highestApprovedBab + 1;
     
+    if (useManualProgress && tugasAkhir[0].manual_current_bab) {
+      // Jika ada manual override, allowed bab adalah manual_current_bab + 1
+      // KECUALI jika manual_current_bab < highestApprovedBab
+      const manualBab = tugasAkhir[0].manual_current_bab;
+      if (manualBab > highestApprovedBab) {
+        nextAllowedBab = manualBab + 1;
+        console.log('📊 Upload using MANUAL next allowed BAB:', nextAllowedBab);
+      } else {
+        console.log('📊 Upload using AUTO next allowed BAB:', nextAllowedBab);
+      }
+    }
+
     if (uploadBab !== nextAllowedBab) {
       fs.unlinkSync(file.path);
       return res.status(400).json({
@@ -535,64 +679,6 @@ exports.getMahasiswaDokumen = async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Gagal mengambil dokumen'
-    });
-  }
-};
-
-// Update Status Mahasiswa
-exports.updateMahasiswaStatus = async (req, res) => {
-  try {
-    const { mahasiswaId } = req.params;
-    const { status, current_bab } = req.body;
-    const dosenId = req.user.id;
-
-    if (!status || !current_bab) {
-      return res.status(400).json({
-        success: false,
-        message: 'Status dan current_bab wajib diisi'
-      });
-    }
-
-    const [mahasiswa] = await db.query(
-      'SELECT * FROM mahasiswa WHERE id = ? AND dosen_pembimbing_id = ?',
-      [mahasiswaId, dosenId]
-    );
-
-    if (mahasiswa.length === 0) {
-      return res.status(404).json({
-        success: false,
-        message: 'Mahasiswa tidak ditemukan'
-      });
-    }
-
-    const [existingTA] = await db.query(
-      'SELECT * FROM tugas_akhir WHERE mahasiswa_id = ?',
-      [mahasiswaId]
-    );
-
-    if (existingTA.length > 0) {
-      await db.query(
-        'UPDATE tugas_akhir SET status = ?, updated_at = NOW() WHERE mahasiswa_id = ?',
-        [status, mahasiswaId]
-      );
-    } else {
-      const taId = `ta_${Date.now()}`;
-      await db.query(
-        `INSERT INTO tugas_akhir (id, mahasiswa_id, judul, status, updated_at, created_at)
-         VALUES (?, ?, ?, ?, NOW(), NOW())`,
-        [taId, mahasiswaId, mahasiswa[0].judul_ta || 'Belum ada judul', status]
-      );
-    }
-
-    res.json({
-      success: true,
-      message: 'Status mahasiswa berhasil diupdate'
-    });
-  } catch (error) {
-    console.error('Error updating mahasiswa status:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Gagal mengupdate status mahasiswa'
     });
   }
 };
